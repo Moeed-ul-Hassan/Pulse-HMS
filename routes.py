@@ -310,6 +310,24 @@ def analytics():
     }
     return render_template('analytics.html', analytics=analytics_data)
 
+@main_bp.route('/patient-portal')
+def patient_portal():
+    # Mock patient data - in real app, this would come from database
+    patient_data = {
+        'id': 'P001',
+        'name': 'John Doe',
+        'age': 35,
+        'blood_type': 'O+',
+        'last_visit': '2024-01-15'
+    }
+    patient_stats = {
+        'total_appointments': 12,
+        'upcoming': 2,
+        'records': 8,
+        'prescriptions': 5
+    }
+    return render_template('patient_portal.html', patient=patient_data, patient_stats=patient_stats)
+
 @main_bp.route('/print/<resource_type>/<int:resource_id>')
 @login_required
 def print_resource(resource_type, resource_id):

@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Portal - Pulse HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid" data-animation="animate-fade-in">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-user-injured me-2"></i>Patient Portal
+                </h1>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="downloadMedicalRecord()">
+                        <i class="fas fa-download me-2"></i>Download Records
+                    </button>
+                    <button class="btn btn-primary" onclick="scheduleAppointment()">
+                        <i class="fas fa-calendar-plus me-2"></i>Schedule Appointment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Info Card -->
+    <div class="row mb-4">
+        <div class="col-12" data-animation="animate-slide-up" data-delay="100">
+            <div class="card patient-info-card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            <div class="patient-avatar">
+                                <i class="fas fa-user-circle fa-4x text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <h4 class="mb-1">{{ patient.name if patient else 'John Doe' }}</h4>
+                            <p class="text-muted mb-2">Patient ID: {{ patient.id if patient else 'P001' }}</p>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <small class="text-muted">Age:</small>
+                                    <strong>{{ patient.age if patient else '35' }} years</strong>
+                                </div>
+                                <div class="col-sm-6">
+                                    <small class="text-muted">Blood Type:</small>
+                                    <strong>{{ patient.blood_type if patient else 'O+' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <div class="patient-status">
+                                <span class="badge bg-success">Active</span>
+                                <p class="text-muted mt-2">Last Visit: {{ patient.last_visit if patient else '2024-01-15' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="200">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Total Appointments</h6>
+                        <h3 class="mb-0">{{ patient_stats.total_appointments if patient_stats else 12 }}</h3>
+                    </div>
+                    <div class="analytics-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="300">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Upcoming</h6>
+                        <h3 class="mb-0">{{ patient_stats.upcoming if patient_stats else 2 }}</h3>
+                    </div>
+                    <div class="analytics-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="400">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Medical Records</h6>
+                        <h3 class="mb-0">{{ patient_stats.records if patient_stats else 8 }}</h3>
+                    </div>
+                    <div class="analytics-icon">
+                        <i class="fas fa-file-medical"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="500">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Prescriptions</h6>
+                        <h3 class="mb-0">{{ patient_stats.prescriptions if patient_stats else 5 }}</h3>
+                    </div>
+                    <div class="analytics-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Tabs -->
+    <div class="row">
+        <div class="col-12" data-animation="animate-slide-up" data-delay="600">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="patientTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab">
+                                <i class="fas fa-calendar-alt me-2"></i>Appointments
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="records-tab" data-bs-toggle="tab" data-bs-target="#records" type="button" role="tab">
+                                <i class="fas fa-file-medical me-2"></i>Medical Records
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="prescriptions-tab" data-bs-toggle="tab" data-bs-target="#prescriptions" type="button" role="tab">
+                                <i class="fas fa-pills me-2"></i>Prescriptions
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="lab-results-tab" data-bs-toggle="tab" data-bs-target="#lab-results" type="button" role="tab">
+                                <i class="fas fa-flask me-2"></i>Lab Results
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="patientTabsContent">
+                        <!-- Appointments Tab -->
+                        <div class="tab-pane fade show active" id="appointments" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>My Appointments</h5>
+                                <button class="btn btn-sm btn-primary" onclick="scheduleAppointment()">
+                                    <i class="fas fa-plus me-2"></i>New Appointment
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date & Time</th>
+                                            <th>Doctor</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>2024-01-20 10:00 AM</td>
+                                            <td>Dr. Smith</td>
+                                            <td>Follow-up</td>
+                                            <td><span class="badge bg-success">Confirmed</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">Reschedule</button>
+                                                <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>2024-01-25 2:30 PM</td>
+                                            <td>Dr. Johnson</td>
+                                            <td>Consultation</td>
+                                            <td><span class="badge bg-warning">Pending</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">Reschedule</button>
+                                                <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Medical Records Tab -->
+                        <div class="tab-pane fade" id="records" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Medical Records</h5>
+                                <button class="btn btn-sm btn-outline-primary" onclick="downloadMedicalRecord()">
+                                    <i class="fas fa-download me-2"></i>Download All
+                                </button>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="record-card">
+                                        <div class="record-header">
+                                            <h6><i class="fas fa-stethoscope me-2"></i>General Checkup</h6>
+                                            <span class="badge bg-info">2024-01-15</span>
+                                        </div>
+                                        <div class="record-body">
+                                            <p><strong>Doctor:</strong> Dr. Smith</p>
+                                            <p><strong>Diagnosis:</strong> Healthy, no issues found</p>
+                                            <p><strong>Notes:</strong> Regular checkup completed successfully</p>
+                                        </div>
+                                        <div class="record-footer">
+                                            <button class="btn btn-sm btn-outline-primary">View Details</button>
+                                            <button class="btn btn-sm btn-outline-secondary">Download</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="record-card">
+                                        <div class="record-header">
+                                            <h6><i class="fas fa-heartbeat me-2"></i>Cardiology Consultation</h6>
+                                            <span class="badge bg-warning">2024-01-10</span>
+                                        </div>
+                                        <div class="record-body">
+                                            <p><strong>Doctor:</strong> Dr. Williams</p>
+                                            <p><strong>Diagnosis:</strong> Mild hypertension</p>
+                                            <p><strong>Notes:</strong> Prescribed medication, follow-up in 2 weeks</p>
+                                        </div>
+                                        <div class="record-footer">
+                                            <button class="btn btn-sm btn-outline-primary">View Details</button>
+                                            <button class="btn btn-sm btn-outline-secondary">Download</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Prescriptions Tab -->
+                        <div class="tab-pane fade" id="prescriptions" role="tabpanel">
+                            <h5>Current Prescriptions</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="prescription-card">
+                                        <div class="prescription-header">
+                                            <h6><i class="fas fa-pills me-2"></i>Lisinopril 10mg</h6>
+                                            <span class="badge bg-success">Active</span>
+                                        </div>
+                                        <div class="prescription-body">
+                                            <p><strong>Prescribed by:</strong> Dr. Williams</p>
+                                            <p><strong>Dosage:</strong> 1 tablet daily</p>
+                                            <p><strong>Duration:</strong> 30 days</p>
+                                            <p><strong>Refills:</strong> 2 remaining</p>
+                                        </div>
+                                        <div class="prescription-footer">
+                                            <button class="btn btn-sm btn-outline-primary">Request Refill</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lab Results Tab -->
+                        <div class="tab-pane fade" id="lab-results" role="tabpanel">
+                            <h5>Laboratory Results</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Test Name</th>
+                                            <th>Date</th>
+                                            <th>Result</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Blood Test</td>
+                                            <td>2024-01-15</td>
+                                            <td>Normal</td>
+                                            <td><span class="badge bg-success">Completed</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">View Report</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Cholesterol Panel</td>
+                                            <td>2024-01-15</td>
+                                            <td>Elevated</td>
+                                            <td><span class="badge bg-warning">Review Required</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">View Report</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.patient-info-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.patient-avatar {
+    margin-bottom: 1rem;
+}
+
+.record-card, .prescription-card {
+    border: 1px solid var(--border-grey);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--card-grey);
+}
+
+.record-header, .prescription-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-grey);
+}
+
+.record-body, .prescription-body {
+    margin-bottom: 1rem;
+}
+
+.record-footer, .prescription-footer {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.nav-tabs .nav-link {
+    color: var(--primary-grey);
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--medical-blue);
+    border-bottom-color: var(--medical-blue);
+    background: none;
+}
+</style>
+
+<script>
+function scheduleAppointment() {
+    showInfo('Scheduling', 'Redirecting to appointment scheduling...');
+    setTimeout(() => {
+        window.location.href = '/appointments/create';
+    }, 1000);
+}
+
+function downloadMedicalRecord() {
+    showInfo('Downloading', 'Preparing your medical records for download...');
+    setTimeout(() => {
+        showSuccess('Download Complete', 'Your medical records have been downloaded successfully!');
+    }, 2000);
+}
+</script>
+{% endblock %} 
