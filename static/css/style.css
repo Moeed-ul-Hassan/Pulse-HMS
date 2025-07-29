@@ -675,9 +675,9 @@ html {
 /* Main Content */
 .main-content {
     flex: 1;
-    margin-left: 260px;
-    padding: 1rem 1.5rem;
-    background: var(--background-grey);
+    margin-left: 280px;
+    padding: 0.5rem 1rem;
+    background: transparent;
     min-height: calc(100vh - 70px);
     transition: margin-left 0.3s ease;
     margin-top: 0;
@@ -746,7 +746,7 @@ body.authenticated .flash-messages {
     
     .main-content {
         margin-left: 0;
-        padding: 0.75rem;
+        padding: 0.25rem 0.5rem;
         margin-top: 0;
     }
     
@@ -848,14 +848,14 @@ body.authenticated .flash-messages {
 .card-header {
     background: rgba(255, 255, 255, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: var(--spacing-lg) var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-lg);
     font-weight: var(--font-weight-semibold);
     color: var(--primary-grey);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
 }
 
 .card-body {
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
     color: var(--primary-grey);
 }
 
@@ -866,7 +866,7 @@ body.authenticated .flash-messages {
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: var(--radius-xl);
-    padding: var(--spacing-2xl);
+    padding: var(--spacing-xl);
     text-align: center;
     box-shadow: var(--shadow-glass);
     transition: all var(--transition-normal);
@@ -1265,7 +1265,7 @@ body.authenticated .flash-messages {
 
 @media (max-width: 576px) {
     .main-content {
-        padding: 0.5rem;
+        padding: 0.25rem;
     }
     
     .card {
@@ -1287,7 +1287,7 @@ body.authenticated .flash-messages {
 
 @media (min-width: 1200px) {
     .main-content {
-        padding: 1.5rem 2rem;
+        padding: 0.75rem 1.5rem;
     }
 }
 
@@ -1654,6 +1654,25 @@ body.authenticated .flash-messages {
 }
 
 /* Print Media Queries */
+/* Custom spacing fixes */
+.row {
+    margin-bottom: 1rem;
+}
+
+.row:last-child {
+    margin-bottom: 0;
+}
+
+/* Reduce spacing for dashboard cards */
+.row .col-xl-3,
+.row .col-xl-4,
+.row .col-xl-6,
+.row .col-lg-6,
+.row .col-lg-8,
+.row .col-md-6 {
+    margin-bottom: 1rem;
+}
+
 @media print {
     .navbar, .sidebar, .btn, .pagination {
         display: none !important;
