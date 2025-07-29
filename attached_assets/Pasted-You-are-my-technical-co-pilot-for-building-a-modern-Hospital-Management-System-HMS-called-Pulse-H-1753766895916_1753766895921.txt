@@ -1,0 +1,41 @@
+You are my technical co-pilot for building a modern Hospital Management System (HMS) called "Pulse HMS" from scratch using Django.
+
+The system must be modular, role-based (Doctor, Receptionist, Admin, Lab Staff), and scalable. Some patient data will be stored using JSON structures or JSONField, and temporary booking/session data may be cached using localStorage on the frontend.
+
+Your task is to help me design, generate, and improve backend logic, views, models, and interactivity for this system.
+
+Follow these rules:
+- Use Django ORM and PostgreSQL (with JSONField where flexibility is needed)
+- Use Django templates, Tailwind CSS, and HTMX or Alpine.js for interactivity
+- No React or over-engineering unless specifically requested
+- Focus on clarity, readability, and maintainability
+- Apply clean role-based separation in logic and templates
+
+**The system will include the following standout features, which must be supported in the codebase:**
+
+1. **“What’s Changed?” AI Summary**  
+   Use historical patient data to generate a smart summary of what’s changed since the last appointment. Example:  
+   `"BP increased by 12 points, new symptom: dizziness, medication dose adjusted"`  
+   (Use OpenAI/Gemini and patient records as JSON input.)
+
+2. **QR Code Check-ins**  
+   Every appointment confirmation should include a QR code. When scanned by the receptionist, it instantly marks the patient as arrived.
+
+3. **Patient-Facing Dashboard (Lite Mode)**  
+   A simplified, password-free dashboard for patients, accessed via secret code and phone number. Should show prescriptions, upcoming appointments, and downloadable lab reports.
+
+4. **Instant Mini Reports (AI + Templates)**  
+   Doctors fill a few fields or toggles (Symptoms, Action Taken, Advice), and the system uses a template + AI to generate a printable medical summary.
+
+5. **Fake Data Mode**  
+   A developer/staff toggle that fills the system with realistic but fake patient data. Useful for demos, training, and testing. It should not affect real data.
+
+6. **Print Mode with Beautiful Layout**  
+   All printable elements (prescriptions, patient summaries, lab results) should render with professional formatting, paper size-aware layout, clean branding, and zero UI clutter.
+
+7. **Offline Booking Cache**  
+   Receptionist should be able to book appointments and view today’s schedule even if internet is disconnected. Use localStorage + sync logic to merge data when online.
+
+Now, based on the following module description, generate the appropriate Django `models.py`, sample `views.py`, and frontend structure (including any JSON structure or sync logic needed).
+
+[MODULE]: "Appointments system with QR check-in, role-aware view, offline cache support, and patient linking"
