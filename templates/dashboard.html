@@ -4,96 +4,95 @@
 
 {% block content %}
 <div class="container-fluid" data-animation="animate-fade-in">
-<div class="container-fluid py-4">
     <!-- Page Header -->
-    <div class="row mb-4">
+    <div class="row mb-3">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 mb-1 fade-in-up">
+                    <h1 class="h4 mb-1 fade-in-up">
                         <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
                     </h1>
-                    <p class="text-muted mb-0">Welcome back, {{ current_user.full_name }}</p>
+                    <p class="text-muted mb-0 small">Welcome back, {{ current_user.full_name }}</p>
                 </div>
                 <div class="text-end">
-                    <p class="mb-0 text-muted"><i class="fas fa-clock me-2"></i>{{ current_time }}</p>
-                    <p class="mb-0"><span class="badge bg-primary">{{ current_user.role.description }}</span></p>
+                    <p class="mb-0 text-muted small"><i class="fas fa-clock me-1"></i>{{ current_time }}</p>
+                    <p class="mb-0"><span class="badge bg-primary small">{{ current_user.role.description }}</span></p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Dashboard Cards -->
-    <div class="row mb-4">
+    <div class="row mb-3">
         {% if current_user.has_role('admin') %}
-        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="100">
+        <div class="col-xl-3 col-md-6" data-animation="animate-slide-up" data-delay="100">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 <i class="fas fa-users fa-2x mb-3"></i>
                 <div class="display-4">{{ dashboard_data.total_patients or 0 }}</div>
                 <h5>Total Patients</h5>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="200">
+        <div class="col-xl-3 col-md-6" data-animation="animate-slide-up" data-delay="200">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <i class="fas fa-user-md fa-2x mb-3"></i>
+                <i class="fas fa-user-md fa-2x mb-2"></i>
                 <div class="display-4">{{ dashboard_data.total_users or 0 }}</div>
                 <h5>Staff Members</h5>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="300">
+        <div class="col-xl-3 col-md-6" data-animation="animate-slide-up" data-delay="300">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                <i class="fas fa-calendar-check fa-2x mb-3"></i>
+                <i class="fas fa-calendar-check fa-2x mb-2"></i>
                 <div class="display-4">{{ dashboard_data.today_appointments or 0 }}</div>
                 <h5>Today's Appointments</h5>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="400">
+        <div class="col-xl-3 col-md-6" data-animation="animate-slide-up" data-delay="400">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                <i class="fas fa-flask fa-2x mb-3"></i>
+                <i class="fas fa-flask fa-2x mb-2"></i>
                 <div class="display-4">{{ dashboard_data.pending_lab_results or 0 }}</div>
                 <h5>Pending Lab Results</h5>
             </div>
         </div>
         {% elif current_user.has_role('doctor') %}
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <i class="fas fa-calendar-check fa-2x mb-3"></i>
+                <i class="fas fa-calendar-check fa-2x mb-2"></i>
                 <div class="display-4">{{ dashboard_data.today_appointments or 0 }}</div>
                 <h5>Today's Appointments</h5>
             </div>
         </div>
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <i class="fas fa-users fa-2x mb-3"></i>
+                <i class="fas fa-users fa-2x mb-2"></i>
                 <div class="display-4">{{ dashboard_data.my_patients or 0 }}</div>
                 <h5>My Patients</h5>
             </div>
         </div>
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                <i class="fas fa-file-medical-alt fa-2x mb-3"></i>
+                <i class="fas fa-file-medical-alt fa-2x mb-2"></i>
                 <div class="display-4">{{ dashboard_data.pending_records or 0 }}</div>
                 <h5>Pending Records</h5>
             </div>
         </div>
         {% elif current_user.has_role('receptionist') %}
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <i class="fas fa-calendar-alt fa-2x mb-3"></i>
+                <i class="fas fa-calendar-alt fa-2x mb-2"></i>
                 <div class="display-4">{{ dashboard_data.today_appointments or 0 }}</div>
                 <h5>Today's Appointments</h5>
             </div>
         </div>
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                <i class="fas fa-check-circle fa-2x mb-3"></i>
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
                 <div class="display-4">{{ dashboard_data.checked_in or 0 }}</div>
                 <h5>Checked In</h5>
             </div>
         </div>
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <i class="fas fa-hourglass-half fa-2x mb-3"></i>
+                <i class="fas fa-hourglass-half fa-2x mb-2"></i>
                 <div class="display-4">{{ dashboard_data.waiting or 0 }}</div>
                 <h5>Waiting</h5>
             </div>
@@ -103,15 +102,15 @@
 
     <div class="row">
         <!-- Charts Section -->
-        <div class="col-lg-8 mb-4">
+        <div class="col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">
+                    <h6 class="mb-0">
                         <i class="fas fa-chart-pie me-2"></i>Appointment Statistics
-                    </h5>
+                    </h6>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="height: 300px;">
+                    <div class="chart-container" style="height: 250px;">
                         <canvas id="appointmentsChart"></canvas>
                     </div>
                 </div>
@@ -119,37 +118,37 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="col-lg-4 mb-4">
+        <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">
+                    <h6 class="mb-0">
                         <i class="fas fa-bolt me-2"></i>Quick Actions
-                    </h5>
+                    </h6>
                 </div>
                 <div class="card-body">
                     {% if current_user.has_role('admin') or current_user.has_role('receptionist') %}
-                    <a href="{{ url_for('main.create_appointment') }}" class="btn btn-primary w-100 mb-3">
+                    <a href="{{ url_for('main.create_appointment') }}" class="btn btn-primary w-100 mb-2">
                         <i class="fas fa-plus me-2"></i>New Appointment
                     </a>
-                    <a href="{{ url_for('main.create_patient') }}" class="btn btn-success w-100 mb-3">
+                    <a href="{{ url_for('main.create_patient') }}" class="btn btn-success w-100 mb-2">
                         <i class="fas fa-user-plus me-2"></i>Add Patient
                     </a>
-                    <a href="{{ url_for('main.qr_checkin') }}" class="btn btn-warning w-100 mb-3">
+                    <a href="{{ url_for('main.qr_checkin') }}" class="btn btn-warning w-100 mb-2">
                         <i class="fas fa-qrcode me-2"></i>QR Check-in
                     </a>
                     {% endif %}
                     
                     {% if current_user.has_role('doctor') %}
-                    <a href="{{ url_for('main.appointments') }}" class="btn btn-primary w-100 mb-3">
+                    <a href="{{ url_for('main.appointments') }}" class="btn btn-primary w-100 mb-2">
                         <i class="fas fa-calendar-alt me-2"></i>My Appointments
                     </a>
-                    <a href="{{ url_for('main.patients') }}" class="btn btn-success w-100 mb-3">
+                    <a href="{{ url_for('main.patients') }}" class="btn btn-success w-100 mb-2">
                         <i class="fas fa-users me-2"></i>My Patients
                     </a>
                     {% endif %}
                     
                     {% if current_user.has_role('admin') %}
-                    <hr>
+                    <hr class="my-2">
                     <a href="{{ url_for('main.generate_fake_data_route') }}" class="btn btn-outline-secondary w-100">
                         <i class="fas fa-database me-2"></i>Generate Test Data
                     </a>
@@ -164,9 +163,9 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">
+                    <h6 class="mb-0">
                         <i class="fas fa-clock me-2"></i>Recent Activity
-                    </h5>
+                    </h6>
                 </div>
                 <div class="card-body">
                     <div class="timeline">
@@ -175,7 +174,7 @@
                             <div class="timeline-marker bg-primary"></div>
                             <div class="timeline-content">
                                 <h6 class="mb-1">System Started</h6>
-                                <p class="text-muted mb-0">Welcome to Pulse HMS</p>
+                                <p class="text-muted mb-0 small">Welcome to Pulse HMS</p>
                                 <small class="text-muted">Just now</small>
                             </div>
                         </div>

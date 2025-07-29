@@ -44,8 +44,9 @@
                 <i class="fas fa-heartbeat me-2"></i>Pulse HMS
             </a>
             
-            <button class="sidebar-toggle d-md-none" type="button" onclick="toggleSidebar()">
-                <i class="fas fa-bars"></i>
+            <!-- Sidebar Toggle Button - Visible on all screen sizes -->
+            <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" id="sidebarToggleBtn">
+                <i class="fas fa-bars" id="sidebarToggleIcon"></i>
             </button>
             
             <div class="navbar-nav ms-auto">
@@ -121,7 +122,8 @@
                     <i class="fas fa-heartbeat text-primary me-2 fs-4"></i>
                     <span class="brand-text">Pulse HMS</span>
                 </div>
-                <button class="sidebar-close d-md-none" onclick="toggleSidebar()">
+                <!-- Sidebar Close Button - Visible on all screen sizes -->
+                <button class="sidebar-close" onclick="toggleSidebar()" id="sidebarCloseBtn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -296,41 +298,162 @@
     
     <!-- Enhanced UI JavaScript -->
     <script>
+        /**
+         * Sidebar Toggle System
+         * 
+         * This implementation provides a smooth, responsive sidebar toggle functionality:
+         * 
+         * Features:
+         * - Smooth CSS transitions using cubic-bezier easing
+         * - State persistence using localStorage
+         * - Responsive behavior (different defaults for mobile/desktop)
+         * - Keyboard shortcut (Ctrl/Cmd + B)
+         * - Visual feedback on toggle button
+         * - Auto-close on mobile navigation
+         * 
+         * Usage:
+         * - Click the hamburger menu button to toggle
+         * - Use Ctrl/Cmd + B keyboard shortcut
+         * - Click overlay on mobile to close
+         * - State is remembered across page reloads
+         */
+        
+        // Sidebar state management
+        let sidebarState = {
+            isVisible: true,
+            isMobile: false
+        };
+
         // Sidebar Toggle Functionality
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
             const overlay = document.getElementById('sidebarOverlay');
+            const toggleBtn = document.getElementById('sidebarToggleBtn');
+            const toggleIcon = document.getElementById('sidebarToggleIcon');
             
-            sidebar.classList.toggle('show');
-            overlay.classList.toggle('show');
+            // Toggle sidebar visibility
+            sidebarState.isVisible = !sidebarState.isVisible;
+            
+            if (sidebarState.isVisible) {
+                // Show sidebar
+                sidebar.classList.remove('sidebar-hidden');
+                mainContent.classList.remove('content-expanded');
+                overlay.classList.remove('show');
+                toggleBtn.classList.remove('sidebar-hidden');
+                toggleIcon.className = 'fas fa-bars';
+                
+                // Add smooth animation class
+                sidebar.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            } else {
+                // Hide sidebar
+                sidebar.classList.add('sidebar-hidden');
+                mainContent.classList.add('content-expanded');
+                toggleBtn.classList.add('sidebar-hidden');
+                toggleIcon.className = 'fas fa-bars';
+                
+                // Show overlay on mobile
+                if (sidebarState.isMobile) {
+                    overlay.classList.add('show');
+                }
+            }
+            
+            // Save state to localStorage
+            localStorage.setItem('sidebarVisible', sidebarState.isVisible);
         }
         
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('DOMContentLoaded', function() {
+        // Initialize sidebar state
+        function initializeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
             const overlay = document.getElementById('sidebarOverlay');
+            const toggleBtn = document.getElementById('sidebarToggleBtn');
+            const toggleIcon = document.getElementById('sidebarToggleIcon');
+            
+            // Check if we're on mobile
+            sidebarState.isMobile = window.innerWidth <= 768;
+            
+            // Load saved state (default to visible on desktop, hidden on mobile)
+            const savedState = localStorage.getItem('sidebarVisible');
+            if (savedState !== null) {
+                sidebarState.isVisible = JSON.parse(savedState);
+            } else {
+                sidebarState.isVisible = !sidebarState.isMobile; // Visible on desktop, hidden on mobile by default
+            }
+            
+            // Apply initial state
+            if (!sidebarState.isVisible) {
+                sidebar.classList.add('sidebar-hidden');
+                mainContent.classList.add('content-expanded');
+                toggleBtn.classList.add('sidebar-hidden');
+                if (sidebarState.isMobile) {
+                    overlay.classList.add('show');
+                }
+            }
+            
+            // Add event listeners
             if (overlay) {
                 overlay.addEventListener('click', toggleSidebar);
             }
             
             // Auto-close sidebar on mobile when navigating
-            if (window.innerWidth <= 768) {
+            if (sidebarState.isMobile) {
                 const navLinks = document.querySelectorAll('.sidebar .nav-link');
                 navLinks.forEach(link => {
                     link.addEventListener('click', function() {
-                        setTimeout(toggleSidebar, 100);
+                        setTimeout(() => {
+                            if (sidebarState.isVisible) {
+                                toggleSidebar();
+                            }
+                        }, 100);
                     });
                 });
             }
-        });
+        }
         
-        // Responsive sidebar handling
-        window.addEventListener('resize', function() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
+        // Handle window resize
+        function handleResize() {
+            const wasMobile = sidebarState.isMobile;
+            sidebarState.isMobile = window.innerWidth <= 768;
             
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('show');
-                overlay.classList.remove('show');
+            // If switching between mobile and desktop
+            if (wasMobile !== sidebarState.isMobile) {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                const overlay = document.getElementById('sidebarOverlay');
+                
+                if (sidebarState.isMobile) {
+                    // Switched to mobile - hide sidebar by default
+                    if (sidebarState.isVisible) {
+                        sidebar.classList.add('sidebar-hidden');
+                        mainContent.classList.add('content-expanded');
+                        overlay.classList.add('show');
+                        sidebarState.isVisible = false;
+                    }
+                } else {
+                    // Switched to desktop - show sidebar by default
+                    sidebar.classList.remove('sidebar-hidden');
+                    mainContent.classList.remove('content-expanded');
+                    overlay.classList.remove('show');
+                    sidebarState.isVisible = true;
+                }
+                
+                // Save new state
+                localStorage.setItem('sidebarVisible', sidebarState.isVisible);
+            }
+        }
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeSidebar);
+        
+        // Handle window resize
+        window.addEventListener('resize', handleResize);
+        
+        // Add keyboard shortcut (Ctrl/Cmd + B) to toggle sidebar
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                e.preventDefault();
+                toggleSidebar();
             }
         });
     </script>
