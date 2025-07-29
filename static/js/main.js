@@ -95,6 +95,34 @@ function initializeSmoothScrolling() {
             });
         });
     }
+    
+    // Enhanced navbar scroll effects
+    const navbar = document.querySelector('.top-navbar');
+    if (navbar) {
+        let lastScrollTop = 0;
+        
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Add scrolled class for enhanced styling
+            if (scrollTop > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            
+            // Hide/show navbar on scroll (optional)
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down
+                navbar.style.transform = 'translateY(-100%)';
+            } else {
+                // Scrolling up
+                navbar.style.transform = 'translateY(0)';
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+    }
 }
 
 // Receipt system
