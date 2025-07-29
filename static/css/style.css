@@ -749,7 +749,7 @@ html {
 .main-content {
     flex: 1;
     margin-left: 260px;
-    padding: 0.5rem;
+    padding: 0;
     background: transparent;
     min-height: calc(100vh - 60px);
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Sound System Test - Pulse HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-volume-up me-2"></i>Sound System Test
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Test the sound system by clicking the buttons below. Make sure you have added actual audio files to the <code>/static/audio/</code> directory.
+                    </p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Sound Effects Test</h6>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" onclick="testSound('sidebar-toggle')">
+                                    <i class="fas fa-bars me-2"></i>Sidebar Toggle Sound
+                                </button>
+                                <button class="btn btn-success" onclick="testSound('button-click')">
+                                    <i class="fas fa-mouse-pointer me-2"></i>Button Click Sound
+                                </button>
+                                <button class="btn btn-info" onclick="testSound('notification')">
+                                    <i class="fas fa-bell me-2"></i>Notification Sound
+                                </button>
+                                <button class="btn btn-warning" onclick="testSound('success')">
+                                    <i class="fas fa-check-circle me-2"></i>Success Sound
+                                </button>
+                                <button class="btn btn-danger" onclick="testSound('error')">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Error Sound
+                                </button>
+                                <button class="btn btn-secondary" onclick="testSound('hover')">
+                                    <i class="fas fa-mouse me-2"></i>Hover Sound
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Notification Test</h6>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-success" onclick="testNotification('success', 'Success!', 'This is a success notification.')">
+                                    <i class="fas fa-check me-2"></i>Success Notification
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="testNotification('error', 'Error!', 'This is an error notification.')">
+                                    <i class="fas fa-times me-2"></i>Error Notification
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="testNotification('warning', 'Warning!', 'This is a warning notification.')">
+                                    <i class="fas fa-exclamation me-2"></i>Warning Notification
+                                </button>
+                                <button class="btn btn-outline-info" onclick="testNotification('info', 'Info', 'This is an info notification.')">
+                                    <i class="fas fa-info me-2"></i>Info Notification
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Sound System Status</h6>
+                            <div id="soundStatus" class="alert alert-info">
+                                <i class="fas fa-spinner fa-spin me-2"></i>Loading sound system status...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function testSound(soundName) {
+    if (window.soundSystem) {
+        window.soundSystem.play(soundName);
+        console.log(`Testing sound: ${soundName}`);
+    } else {
+        alert('Sound system not loaded!');
+    }
+}
+
+function testNotification(type, title, message) {
+    if (window.notifications) {
+        window.notifications.addNotification(type, title, message);
+    } else {
+        alert('Notification system not loaded!');
+    }
+}
+
+// Update sound system status
+function updateSoundStatus() {
+    const statusDiv = document.getElementById('soundStatus');
+    if (window.soundSystem) {
+        const config = window.soundSystem.config;
+        const audioCache = window.soundSystem.audioCache;
+        const loadedSounds = Object.keys(audioCache).length;
+        const totalSounds = Object.keys(config.sounds).length;
+        
+        statusDiv.className = 'alert alert-success';
+        statusDiv.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Sound System Active</strong><br>
+            <small>
+                Status: ${config.enabled ? 'Enabled' : 'Disabled'} | 
+                Volume: ${Math.round(config.volume * 100)}% | 
+                Loaded: ${loadedSounds}/${totalSounds} sounds
+            </small>
+        `;
+    } else {
+        statusDiv.className = 'alert alert-warning';
+        statusDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Sound System Not Loaded</strong><br>
+            <small>Check the browser console for errors.</small>
+        `;
+    }
+}
+
+// Update status when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(updateSoundStatus, 1000);
+});
+</script>
+{% endblock %} 

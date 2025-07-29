@@ -90,8 +90,11 @@ class NotificationSystem {
             }
         }, duration);
 
-        // Play sound if enabled
-        if (this.soundEnabled) {
+        // Play sound using the sound system
+        if (window.soundSystem) {
+            window.soundSystem.playNotification();
+        } else if (this.soundEnabled) {
+            // Fallback to old sound system
             this.notificationSound.play().catch(() => {});
         }
     }

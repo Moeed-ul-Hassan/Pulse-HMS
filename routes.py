@@ -405,3 +405,9 @@ def offline_sync():
     
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
+@main_bp.route('/sound-test')
+@login_required
+def sound_test():
+    """Test page for the sound system functionality"""
+    return render_template('sound-test.html')

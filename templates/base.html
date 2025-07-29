@@ -222,6 +222,16 @@
                     </li>
                     {% endif %}
                     
+                    <!-- Sound System Test (Admin only) -->
+                    {% if current_user.has_role('admin') %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('main.sound_test') }}" class="nav-link">
+                            <i class="fas fa-volume-up nav-icon"></i>
+                            <span class="nav-text">Sound Test</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
                     <!-- Reports & Analytics (Admin only) -->
                     {% if current_user.has_role('admin') %}
                     <li class="nav-section-title">
@@ -360,6 +370,11 @@
             
             // Save state to localStorage
             localStorage.setItem('sidebarVisible', sidebarState.isVisible);
+            
+            // Play sound effect (if sound system is available)
+            if (window.soundSystem) {
+                window.soundSystem.play('sidebar-toggle');
+            }
         }
         
         // Initialize sidebar state
@@ -462,6 +477,7 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/offline.js') }}"></script>
     <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sound-system.js') }}"></script>
     
     {% block extra_js %}{% endblock %}
     
