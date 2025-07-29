@@ -43,6 +43,8 @@ body {
     color: var(--primary-grey);
     line-height: 1.6;
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 /* Glass Morphism Effects */
@@ -71,6 +73,7 @@ body {
     right: 0;
     z-index: 1050;
     height: 70px;
+    margin: 0;
 }
 
 .navbar-brand {
@@ -150,6 +153,7 @@ body {
     display: flex;
     min-height: 100vh;
     margin-top: 70px;
+    background: var(--background-grey);
 }
 
 /* Modern Sidebar */
@@ -285,10 +289,11 @@ body {
 .main-content {
     flex: 1;
     margin-left: 260px;
-    padding: 2rem;
+    padding: 1rem 1.5rem;
     background: var(--background-grey);
     min-height: calc(100vh - 70px);
     transition: margin-left 0.3s ease;
+    margin-top: 0;
 }
 
 .flash-messages {
@@ -354,11 +359,20 @@ body.authenticated .flash-messages {
     
     .main-content {
         margin-left: 0;
-        padding: 1rem;
+        padding: 0.75rem;
+        margin-top: 0;
     }
     
     .user-info {
         display: none !important;
+    }
+    
+    .top-navbar {
+        height: 60px;
+    }
+    
+    .main-wrapper {
+        margin-top: 60px;
     }
 }
 
@@ -743,6 +757,39 @@ body.authenticated .flash-messages {
     
     .card {
         margin-bottom: 1rem;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content {
+        padding: 0.5rem;
+    }
+    
+    .card {
+        margin-bottom: 0.75rem;
+    }
+    
+    .dashboard-card {
+        margin-bottom: 0.75rem;
+    }
+    
+    .top-navbar {
+        height: 60px;
+    }
+    
+    .main-wrapper {
+        margin-top: 60px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .main-content {
+        padding: 1.5rem 2rem;
     }
 }
 
