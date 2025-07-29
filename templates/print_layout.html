@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% if resource_type == 'prescription' %}
+        Prescription - {{ patient.full_name }}
+        {% elif resource_type == 'lab_result' %}
+        Lab Result - {{ patient.full_name }}
+        {% elif resource_type == 'appointment' %}
+        Appointment - {{ patient.full_name }}
+        {% else %}
+        Medical Document - {{ patient.full_name }}
+        {% endif %}
+    </title>
+    
+    <!-- Bootstrap for basic styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        @media print {
+            @page {
+                size: A4;
+                margin: 2cm;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+        }
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+            color: #000;
+            background: white;
+        }
+        
+        .medical-letterhead {
+            text-align: center;
+            border-bottom: 3px solid #2d3748;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .medical-letterhead h1 {
+            color: #3182ce;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .medical-letterhead .subtitle {
+            color: #2d3748;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        
+        .medical-letterhead .contact-info {
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+        
+        .document-header {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3182ce;
+        }
+        
+        .patient-info {
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .prescription-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .signature-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #ccc;
+        }
+        
+        .signature-box {
+            width: 200px;
+            height: 60px;
+            border-bottom: 2px solid #000;
+            margin-top: 20px;
+        }
+        
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            color: rgba(0, 0, 0, 0.05);
+            z-index: -1;
+            font-weight: bold;
+        }
+        
+        .qr-code-section {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: center;
+        }
+        
+        .vital-signs-table {
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .vital-signs-table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .footer-info {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Watermark -->
+    <div class="watermark">PULSE HMS</div>
+    
+    <!-- Print Button (Hidden in Print) -->
+    <div class="no-print position-fixed top-0 end-0 p-3">
+        <button class="btn btn-primary" onclick="window.print()">
+            <i class="fas fa-print me-2"></i>Print Document
+        </button>
+        <button class="btn btn-secondary ms-2" onclick="window.close()">
+            <i class="fas fa-times me-2"></i>Close
+        </button>
+    </div>
+    
+    <div class="container-fluid print-layout">
+        <!-- Medical Letterhead -->
+        <div class="medical-letterhead">
+            <h1>PULSE HMS</h1>
+            <p class="subtitle">Modern Hospital Management System</p>
+            <div class="contact-info">
+                <p class="mb-1">123 Medical Center Drive, Healthcare City, HC 12345</p>
+                <p class="mb-1">Phone: (555) 123-4567 | Emergency: 911 | Email: info@pulsehms.com</p>
+                <p class="mb-0">Licensed Healthcare Facility #HC-2024-001</p>
+            </div>
+        </div>
+        
+        <!-- QR Code Section (if applicable) -->
+        {% if resource_type == 'appointment' and appointment.qr_code %}
+        <div class="qr-code-section no-print">
+            <img src="{{ appointment.qr_code }}" alt="Appointment QR Code" style="width: 100px; height: 100px;">
+            <p class="small mt-2">Scan for Check-in</p>
+        </div>
+        {% endif %}
+        
+        <!-- Document Type Header -->
+        <div class="document-header">
+            <div class="row">
+                <div class="col-8">
+                    <h2 class="mb-1">
+                        {% if resource_type == 'prescription' %}
+                        MEDICAL PRESCRIPTION
+                        {% elif resource_type == 'lab_result' %}
+                        LABORATORY RESULTS
+                        {% elif resource_type == 'appointment' %}
+                        APPOINTMENT CONFIRMATION
+                        {% else %}
+                        MEDICAL DOCUMENT
+                        {% endif %}
+                    </h2>
+                    <p class="mb-0 text-muted">
+                        Document ID: 
+                        {% if resource_type == 'prescription' %}
+                        PRESC-{{ record.id }}
+                        {% elif resource_type == 'lab_result' %}
+                        LAB-{{ lab_result.id }}
+                        {% elif resource_type == 'appointment' %}
+                        {{ appointment.appointment_id }}
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-4 text-end">
+                    <p class="mb-1"><strong>Date:</strong> {{ moment().strftime('%B %d, %Y') }}</p>
+                    <p class="mb-0"><strong>Time:</strong> {{ moment().strftime('%I:%M %p') }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Patient Information -->
+        <div class="patient-info">
+            <h4 class="mb-3">Patient Information</h4>
+            <div class="row">
+                <div class="col-6">
+                    <p><strong>Name:</strong> {{ patient.full_name }}</p>
+                    <p><strong>Patient ID:</strong> {{ patient.patient_id }}</p>
+                    <p><strong>Date of Birth:</strong> {{ patient.date_of_birth.strftime('%B %d, %Y') }}</p>
+                    <p><strong>Age:</strong> {{ patient.age }} years</p>
+                </div>
+                <div class="col-6">
+                    <p><strong>Gender:</strong> {{ patient.gender }}</p>
+                    <p><strong>Blood Type:</strong> {{ patient.blood_type or 'Unknown' }}</p>
+                    <p><strong>Phone:</strong> {{ patient.phone }}</p>
+                    {% if patient.allergies and patient.allergies != 'None reported' %}
+                    <p><strong style="color: #e53e3e;">Allergies:</strong> <span style="color: #e53e3e;">{{ patient.allergies }}</span></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content Based on Resource Type -->
+        {% if resource_type == 'prescription' %}
+        <!-- Prescription Content -->
+        <div class="prescription-content">
+            <div class="row mb-4">
+                <div class="col-6">
+                    <p><strong>Prescribing Physician:</strong> 
+                    {% if record.doctor %}
+                    Dr. {{ record.doctor.full_name }}
+                    {% else %}
+                    Not specified
+                    {% endif %}
+                    </p>
+                    <p><strong>Date of Consultation:</strong> {{ record.record_date.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div class="col-6">
+                    {% if record.diagnosis %}
+                    <p><strong>Diagnosis:</strong> {{ record.diagnosis }}</p>
+                    {% endif %}
+                    {% if record.chief_complaint %}
+                    <p><strong>Chief Complaint:</strong> {{ record.chief_complaint }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if record.vital_signs %}
+            <div class="mb-4">
+                <h5>Vital Signs</h5>
+                <table class="vital-signs-table">
+                    {% for key, value in record.vital_signs.items() %}
+                    <tr>
+                        <td style="width: 30%;"><strong>{{ key.replace('_', ' ').title() }}:</strong></td>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% endif %}
+            
+            <h5>Prescription Details</h5>
+            {% if record.prescriptions %}
+                {% if record.prescriptions is string %}
+                <div class="prescription-item">
+                    <p class="mb-0">{{ record.prescriptions }}</p>
+                </div>
+                {% else %}
+                {% for prescription in record.prescriptions %}
+                <div class="prescription-item">
+                    <div class="row">
+                        <div class="col-8">
+                            <h6 class="mb-1">{{ prescription.medication if prescription.medication else prescription }}</h6>
+                            {% if prescription.dosage %}
+                            <p class="mb-1"><strong>Dosage:</strong> {{ prescription.dosage }}</p>
+                            {% endif %}
+                            {% if prescription.frequency %}
+                            <p class="mb-1"><strong>Frequency:</strong> {{ prescription.frequency }}</p>
+                            {% endif %}
+                            {% if prescription.duration %}
+                            <p class="mb-0"><strong>Duration:</strong> {{ prescription.duration }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-4 text-end">
+                            {% if prescription.quantity %}
+                            <p class="mb-0"><strong>Quantity:</strong> {{ prescription.quantity }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if prescription.instructions %}
+                    <div class="mt-2 p-2 bg-light rounded">
+                        <small><strong>Instructions:</strong> {{ prescription.instructions }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+            {% else %}
+            <p class="text-muted">No prescriptions recorded.</p>
+            {% endif %}
+            
+            {% if record.treatment_plan %}
+            <div class="mt-4">
+                <h5>Treatment Plan</h5>
+                <div class="p-3 bg-light rounded">
+                    <p class="mb-0">{{ record.treatment_plan }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% elif resource_type == 'lab_result' %}
+        <!-- Lab Results Content -->
+        <div class="lab-results-content">
+            <div class="row mb-4">
+                <div class="col-6">
+                    <p><strong>Test Name:</strong> {{ lab_result.test_name }}</p>
+                    <p><strong>Test Date:</strong> {{ lab_result.test_date.strftime('%B %d, %Y') }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge bg-{{ 'success' if lab_result.status == 'completed' else 'warning' }}">
+                            {{ lab_result.status.title() }}
+                        </span>
+                    </p>
+                </div>
+                <div class="col-6">
+                    {% if lab_result.technician %}
+                    <p><strong>Technician:</strong> {{ lab_result.technician.full_name }}</p>
+                    {% endif %}
+                    {% if lab_result.reviewed_by %}
+                    <p><strong>Reviewed By:</strong> Dr. {{ lab_result.reviewed_by.full_name }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if lab_result.results %}
+            <h5>Test Results</h5>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Test Parameter</th>
+                        <th>Result</th>
+                        <th>Reference Range</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, value in lab_result.results.items() %}
+                    <tr>
+                        <td>{{ key.replace('_', ' ').title() }}</td>
+                        <td><strong>{{ value }}</strong></td>
+                        <td>
+                            {% if lab_result.reference_ranges and lab_result.reference_ranges.get(key) %}
+                            {{ lab_result.reference_ranges[key] }}
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            <!-- This would normally include logic to determine if value is normal/abnormal -->
+                            <span class="badge bg-success">Normal</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+        
+        {% elif resource_type == 'appointment' %}
+        <!-- Appointment Confirmation Content -->
+        <div class="appointment-content">
+            <div class="row mb-4">
+                <div class="col-6">
+                    <p><strong>Appointment Date:</strong> {{ appointment.appointment_date.strftime('%B %d, %Y') }}</p>
+                    <p><strong>Time:</strong> {{ appointment.appointment_date.strftime('%I:%M %p') }}</p>
+                    <p><strong>Duration:</strong> {{ appointment.duration }} minutes</p>
+                    <p><strong>Type:</strong> {{ appointment.type }}</p>
+                </div>
+                <div class="col-6">
+                    {% if appointment.doctor %}
+                    <p><strong>Doctor:</strong> Dr. {{ appointment.doctor.full_name }}</p>
+                    <p><strong>Department:</strong> {{ appointment.doctor.role.description }}</p>
+                    {% endif %}
+                    <p><strong>Status:</strong> 
+                        <span class="badge bg-primary">{{ appointment.status.replace('_', ' ').title() }}</span>
+                    </p>
+                </div>
+            </div>
+            
+            {% if appointment.reason %}
+            <div class="mb-4">
+                <h5>Reason for Visit</h5>
+                <div class="p-3 bg-light rounded">
+                    <p class="mb-0">{{ appointment.reason }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="mb-4">
+                <h5>Important Instructions</h5>
+                <ul>
+                    <li>Please arrive 15 minutes before your scheduled appointment time</li>
+                    <li>Bring a valid ID and insurance card</li>
+                    <li>List of current medications</li>
+                    <li>Any relevant medical records or test results</li>
+                    {% if appointment.qr_code %}
+                    <li>Show this document or scan the QR code for quick check-in</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="row">
+                <div class="col-6">
+                    {% if resource_type == 'prescription' and record.doctor %}
+                    <p><strong>Prescribing Physician:</strong></p>
+                    <div class="signature-box"></div>
+                    <p class="mt-2">Dr. {{ record.doctor.full_name }}</p>
+                    <p class="small text-muted">License #: MD-{{ record.doctor.id }}{{ record.doctor.created_at.year }}</p>
+                    {% elif resource_type == 'lab_result' and lab_result.reviewed_by %}
+                    <p><strong>Reviewed By:</strong></p>
+                    <div class="signature-box"></div>
+                    <p class="mt-2">Dr. {{ lab_result.reviewed_by.full_name }}</p>
+                    <p class="small text-muted">License #: MD-{{ lab_result.reviewed_by.id }}{{ lab_result.reviewed_by.created_at.year }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-6 text-end">
+                    <p><strong>Date:</strong> {{ moment().strftime('%B %d, %Y') }}</p>
+                    {% if resource_type != 'appointment' %}
+                    <p class="small text-muted">This document is digitally generated and valid without signature when printed from official system.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Information -->
+    <div class="footer-info">
+        <p class="mb-0">This document was generated by Pulse HMS on {{ moment().strftime('%B %d, %Y at %I:%M %p') }}</p>
+        <p class="mb-0">For verification, contact Pulse HMS at (555) 123-4567 or visit our website</p>
+    </div>
+    
+    <!-- Font Awesome for icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <script>
+        // Auto-print on load (optional)
+        // window.onload = function() { window.print(); }
+        
+        // Prevent accidental navigation away
+        window.addEventListener('beforeunload', function(e) {
+            if (!window.printComplete) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+        
+        // Mark print as complete when window is closed
+        window.addEventListener('beforeprint', function() {
+            window.printComplete = true;
+        });
+    </script>
+</body>
+</html>

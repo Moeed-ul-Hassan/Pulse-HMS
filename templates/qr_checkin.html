@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+
+{% block title %}QR Check-in - Pulse HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1 fade-in-up">
+                        <i class="fas fa-qrcode me-2 text-primary"></i>QR Check-in
+                    </h1>
+                    <p class="text-muted mb-0">Quick patient check-in using QR codes</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" id="qrScannerBtn" data-bs-toggle="modal" data-bs-target="#qrScanModal">
+                        <i class="fas fa-camera me-2"></i>Scan QR Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- QR Scanner Interface -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-scan me-2"></i>Quick Check-in Scanner
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="qr-scanner-interface">
+                        <div class="qr-preview-large">
+                            <div class="scanner-overlay">
+                                <div class="scanner-line"></div>
+                                <i class="fas fa-qrcode fa-5x text-muted"></i>
+                                <h5 class="mt-3 text-muted">Ready to Scan</h5>
+                                <p class="text-muted">Position appointment QR code within the frame</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <label for="manualQrInput" class="form-label">
+                                        <i class="fas fa-keyboard me-2"></i>Manual QR Code Entry
+                                    </label>
+                                    <input type="text" id="manualQrInput" class="form-control form-control-lg" 
+                                           placeholder="PULSE_HMS:APT12345:123:2024-01-01T10:00:00">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-success btn-lg w-100" onclick="processManualQR()">
+                                        <i class="fas fa-check me-2"></i>Check In
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Check-in Result -->
+                    <div id="checkinResult" class="mt-4" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Appointments -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>Today's Appointments
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="appointment-list" style="max-height: 400px; overflow-y: auto;">
+                        <!-- This would be populated with today's appointments -->
+                        <div class="appointment-item p-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold">John Doe</div>
+                                    <small class="text-muted">09:00 AM - APT12345</small>
+                                </div>
+                                <span class="badge badge-scheduled">Scheduled</span>
+                            </div>
+                        </div>
+                        
+                        <div class="appointment-item p-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold">Jane Smith</div>
+                                    <small class="text-muted">09:30 AM - APT12346</small>
+                                </div>
+                                <span class="badge badge-arrived">Arrived</span>
+                            </div>
+                        </div>
+                        
+                        <div class="appointment-item p-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold">Mike Johnson</div>
+                                    <small class="text-muted">10:00 AM - APT12347</small>
+                                </div>
+                                <span class="badge badge-in_progress">In Progress</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center p-3 text-muted">
+                            <small>More appointments...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Today's Stats
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h5 text-primary">8</div>
+                            <div class="small text-muted">Scheduled</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h5 text-success">3</div>
+                            <div class="small text-muted">Checked In</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Check-ins -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Recent Check-ins
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Patient</th>
+                                    <th>Appointment ID</th>
+                                    <th>Doctor</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentCheckinsTable">
+                                <!-- Recent check-ins would be loaded here -->
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        <i class="fas fa-clock fa-2x mb-2"></i>
+                                        <div>No recent check-ins</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Scanner Modal -->
+<div class="modal fade" id="qrScanModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-qrcode me-2"></i>QR Code Scanner
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="qr-scanner">
+                    <!-- Camera preview would go here -->
+                    <div class="camera-preview">
+                        <div class="scanner-frame">
+                            <div class="scanner-overlay">
+                                <div class="scanning-animation">
+                                    <div class="scanner-line"></div>
+                                </div>
+                                <i class="fas fa-camera fa-3x text-white mb-3"></i>
+                                <p class="text-white">Position QR code within the frame</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual entry fallback -->
+                    <div class="mt-4">
+                        <label for="qrCodeInput" class="form-label">Or enter QR code manually:</label>
+                        <div class="input-group">
+                            <input type="text" id="qrCodeInput" class="form-control" 
+                                   placeholder="PULSE_HMS:APT12345:123:2024-01-01T10:00:00">
+                            <button class="btn btn-primary" onclick="processQRFromModal()">
+                                <i class="fas fa-check me-2"></i>Process
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Check-in Success Modal -->
+<div class="modal fade" id="checkinSuccessModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i>Check-in Successful
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="success-animation mb-4">
+                    <i class="fas fa-check-circle fa-4x text-success"></i>
+                </div>
+                <h4 id="checkinPatientName">Patient Name</h4>
+                <p class="text-muted" id="checkinDetails">Appointment details</p>
+                <p class="mb-0">The patient has been successfully checked in.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                    <i class="fas fa-thumbs-up me-2"></i>Great!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.qr-scanner-interface {
+    text-align: center;
+}
+
+.qr-preview-large {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border: 3px dashed var(--primary-grey);
+    border-radius: 20px;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.scanner-overlay {
+    position: relative;
+    z-index: 1;
+}
+
+.scanner-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--medical-blue), transparent);
+    animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+    0% { transform: translateY(-50px); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateY(300px); opacity: 0; }
+}
+
+.camera-preview {
+    background: #000;
+    border-radius: 12px;
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+}
+
+.scanner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    height: 250px;
+    border: 2px solid var(--medical-blue);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scanning-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.appointment-item {
+    transition: all 0.3s ease;
+}
+
+.appointment-item:hover {
+    background: var(--lightest-grey);
+    transform: translateX(5px);
+}
+
+.success-animation {
+    animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.badge-scheduled { background: var(--medical-blue); }
+.badge-arrived { background: var(--medical-green); }
+.badge-in_progress { background: var(--medical-yellow); }
+.badge-completed { background: var(--medical-green); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Manual QR processing from main interface
+function processManualQR() {
+    const qrInput = document.getElementById('manualQrInput');
+    const qrData = qrInput.value.trim();
+    
+    if (!qrData) {
+        showCheckinResult('error', 'Please enter a QR code');
+        return;
+    }
+    
+    processQRCode(qrData);
+}
+
+// QR processing from modal
+function processQRFromModal() {
+    const qrInput = document.getElementById('qrCodeInput');
+    const qrData = qrInput.value.trim();
+    
+    if (!qrData) {
+        if (window.PulseHMS) {
+            window.PulseHMS.showNotification('Please enter a QR code', 'error');
+        }
+        return;
+    }
+    
+    // Close modal first
+    const modal = bootstrap.Modal.getInstance(document.getElementById('qrScanModal'));
+    modal.hide();
+    
+    // Process QR code
+    processQRCode(qrData);
+}
+
+// Enhanced QR code processing
+function processQRCode(qrData) {
+    showLoading();
+    showCheckinResult('info', 'Processing QR code...');
+    
+    fetch('/qr-checkin/verify', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ qr_data: qrData })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        
+        if (data.success) {
+            showCheckinResult('success', data.message);
+            showSuccessModal(data);
+            updateRecentCheckins();
+            
+            // Clear input
+            document.getElementById('manualQrInput').value = '';
+            document.getElementById('qrCodeInput').value = '';
+        } else {
+            showCheckinResult('error', data.message);
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showCheckinResult('error', 'Error processing QR code');
+        console.error('QR processing error:', error);
+    });
+}
+
+// Show check-in result
+function showCheckinResult(type, message) {
+    const resultDiv = document.getElementById('checkinResult');
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 'alert-info';
+    
+    resultDiv.innerHTML = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    resultDiv.style.display = 'block';
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        resultDiv.style.display = 'none';
+    }, 5000);
+}
+
+// Show success modal with details
+function showSuccessModal(data) {
+    const modal = new bootstrap.Modal(document.getElementById('checkinSuccessModal'));
+    
+    // Extract patient info from message (this would be passed from server in real implementation)
+    document.getElementById('checkinPatientName').textContent = data.patient_name || 'Patient';
+    document.getElementById('checkinDetails').textContent = data.appointment_details || 'Appointment checked in successfully';
+    
+    modal.show();
+}
+
+// Update recent check-ins table
+function updateRecentCheckins() {
+    // In a real implementation, this would fetch recent check-ins from the server
+    const tableBody = document.getElementById('recentCheckinsTable');
+    const now = new Date();
+    
+    const newRow = `
+        <tr class="table-success">
+            <td>${now.toLocaleTimeString()}</td>
+            <td>Patient Name</td>
+            <td>APT12345</td>
+            <td>Dr. Smith</td>
+            <td><span class="badge badge-arrived">Arrived</span></td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        </tr>
+    `;
+    
+    // If table is empty, replace content
+    if (tableBody.querySelector('td[colspan="6"]')) {
+        tableBody.innerHTML = newRow;
+    } else {
+        tableBody.insertAdjacentHTML('afterbegin', newRow);
+    }
+}
+
+// Initialize QR scanner when modal opens
+document.getElementById('qrScanModal').addEventListener('shown.bs.modal', function() {
+    // In a real implementation, this would initialize the camera
+    console.log('QR Scanner modal opened - camera would be initialized here');
+});
+
+// Enhanced keyboard support
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus on manual input
+    const manualInput = document.getElementById('manualQrInput');
+    if (manualInput) {
+        manualInput.focus();
+        
+        // Process on Enter key
+        manualInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processManualQR();
+            }
+        });
+    }
+    
+    // QR code input validation
+    const qrInputs = document.querySelectorAll('#manualQrInput, #qrCodeInput');
+    qrInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const value = this.value.trim();
+            
+            if (value.startsWith('PULSE_HMS:')) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else if (value.length > 0) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+    });
+    
+    // Sound effect for successful check-in (optional)
+    function playSuccessSound() {
+        // Create a simple success sound
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+    }
+});
+
+// Global functions for external use
+window.QRCheckin = {
+    processQRCode,
+    showCheckinResult,
+    updateRecentCheckins
+};
+</script>
+{% endblock %}

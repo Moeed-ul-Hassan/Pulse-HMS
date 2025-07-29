@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+
+{% block title %}{{ patient.full_name }} - Patient Details - Pulse HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Patient Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card patient-header-card" style="background: var(--gradient-primary); color: white;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <div class="patient-avatar bg-white text-primary rounded-circle mx-auto" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold;">
+                                {{ patient.first_name[0] }}{{ patient.last_name[0] }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h2 class="mb-1">{{ patient.full_name }}</h2>
+                            <p class="mb-2 opacity-75">
+                                <strong>ID:</strong> {{ patient.patient_id }} | 
+                                <strong>Age:</strong> {{ patient.age }} | 
+                                <strong>Gender:</strong> {{ patient.gender }}
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-phone me-2"></i>{{ patient.phone }}
+                                {% if patient.email %}
+                                | <i class="fas fa-envelope me-2"></i>{{ patient.email }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group" role="group">
+                                {% if current_user.has_role('admin') or current_user.has_role('receptionist') or current_user.has_role('doctor') %}
+                                <a href="{{ url_for('main.create_appointment') }}?patient_id={{ patient.id }}" class="btn btn-light">
+                                    <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                                </a>
+                                {% endif %}
+                                
+                                {% if current_user.has_role('doctor') %}
+                                <button class="btn btn-light" onclick="generateAISummary({{ patient.id }})">
+                                    <i class="fas fa-robot me-2"></i>AI Summary
+                                </button>
+                                {% endif %}
+                                
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit Patient</a></li>
+                                        <li><a class="dropdown-item" href="{{ url_for('main.print_resource', resource_type='patient', resource_id=patient.id) }}" target="_blank"><i class="fas fa-print me-2"></i>Print Summary</a></li>
+                                        {% if patient.access_code %}
+                                        <li><a class="dropdown-item" href="#" onclick="showAccessCode('{{ patient.access_code }}')"><i class="fas fa-key me-2"></i>Access Code</a></li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Patient Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Patient Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="text-muted">Date of Birth</label>
+                            <div class="fw-bold">{{ patient.date_of_birth.strftime('%Y-%m-%d') }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-muted">Blood Type</label>
+                            <div class="fw-bold">
+                                {% if patient.blood_type %}
+                                <span class="badge bg-danger">{{ patient.blood_type }}</span>
+                                {% else %}
+                                <span class="text-muted">Unknown</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if patient.address %}
+                    <div class="mb-3">
+                        <label class="text-muted">Address</label>
+                        <div class="fw-bold">{{ patient.address }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if patient.emergency_contact %}
+                    <div class="mb-3">
+                        <label class="text-muted">Emergency Contact</label>
+                        <div class="fw-bold">{{ patient.emergency_contact }}</div>
+                        {% if patient.emergency_phone %}
+                        <div class="text-muted">{{ patient.emergency_phone }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if patient.allergies %}
+                    <div class="mb-3">
+                        <label class="text-muted">Allergies</label>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>{{ patient.allergies }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if patient.insurance_info %}
+                    <div class="mb-3">
+                        <label class="text-muted">Insurance</label>
+                        <div class="fw-bold">{{ patient.insurance_info.get('provider', 'N/A') }}</div>
+                        {% if patient.insurance_info.get('policy_number') %}
+                        <div class="text-muted">Policy: {{ patient.insurance_info.policy_number }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Quick Stats
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h4 text-primary">{{ appointments|length }}</div>
+                            <div class="text-muted">Appointments</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 text-success">{{ medical_records|length }}</div>
+                            <div class="text-muted">Records</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Summary and Medical Records -->
+        <div class="col-lg-8 mb-4">
+            <!-- AI Summary Section -->
+            {% if current_user.has_role('doctor') and ai_summary %}
+            <div class="ai-summary mb-4">
+                <h5><i class="fas fa-robot ai-icon"></i>AI Health Summary</h5>
+                <p>{{ ai_summary.summary }}</p>
+                
+                {% if ai_summary.key_changes %}
+                <div class="mt-3">
+                    <strong>Key Changes:</strong>
+                    <ul class="mt-2">
+                        {% for change in ai_summary.key_changes %}
+                        <li>{{ change }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% if ai_summary.risk_level %}
+                <div class="mt-3">
+                    <span class="badge badge-{{ ai_summary.risk_level }}">{{ ai_summary.risk_level.upper() }} RISK</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- AI Summary Container for Dynamic Loading -->
+            <div id="aiSummaryContainer"></div>
+            
+            <!-- Medical Records -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-medical-alt me-2"></i>Recent Medical Records
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if medical_records %}
+                    <div class="timeline">
+                        {% for record in medical_records %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ record.record_date.strftime('%Y-%m-%d') }}</h6>
+                                        {% if record.doctor %}
+                                        <small class="text-muted">Dr. {{ record.doctor.full_name }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="showRecordDetails({{ record.id }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ url_for('main.print_resource', resource_type='prescription', resource_id=record.id) }}" 
+                                           class="btn btn-sm btn-outline-info" target="_blank">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                {% if record.chief_complaint %}
+                                <p class="mb-2"><strong>Chief Complaint:</strong> {{ record.chief_complaint }}</p>
+                                {% endif %}
+                                
+                                {% if record.diagnosis %}
+                                <p class="mb-2"><strong>Diagnosis:</strong> {{ record.diagnosis }}</p>
+                                {% endif %}
+                                
+                                {% if record.vital_signs %}
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Vital Signs:</small>
+                                        {% for key, value in record.vital_signs.items() %}
+                                        <div class="small">{{ key.replace('_', ' ').title() }}: {{ value }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if record.prescriptions %}
+                                <div class="mt-2">
+                                    <small class="text-muted">Prescriptions:</small>
+                                    <div class="small">{{ record.prescriptions|length }} medication(s) prescribed</div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-file-medical fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No medical records found</h6>
+                        <p class="text-muted">Medical records will appear here after appointments.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Appointment History
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Doctor</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Reason</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ appointment.appointment_date.strftime('%Y-%m-%d') }}</div>
+                                        <small class="text-muted">{{ appointment.appointment_date.strftime('%I:%M %p') }}</small>
+                                    </td>
+                                    <td>
+                                        {% if appointment.doctor %}
+                                        <div class="fw-bold">{{ appointment.doctor.full_name }}</div>
+                                        <small class="text-muted">{{ appointment.doctor.role.description }}</small>
+                                        {% else %}
+                                        <span class="text-muted">Not assigned</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ appointment.type }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ appointment.status }}">
+                                            {{ appointment.status.replace('_', ' ').title() }}
+                                        </span>
+                                    </td>
+                                    <td>{{ appointment.reason or 'N/A' }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            {% if appointment.qr_code %}
+                                            <button class="btn btn-sm btn-outline-secondary" 
+                                                    onclick="showQRCode('{{ appointment.qr_code }}')" 
+                                                    title="Show QR Code">
+                                                <i class="fas fa-qrcode"></i>
+                                            </button>
+                                            {% endif %}
+                                            <a href="{{ url_for('main.print_resource', resource_type='appointment', resource_id=appointment.id) }}" 
+                                               class="btn btn-sm btn-outline-info" target="_blank" title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No appointments found</h6>
+                        <p class="text-muted">This patient has no appointment history.</p>
+                        {% if current_user.has_role('admin') or current_user.has_role('receptionist') or current_user.has_role('doctor') %}
+                        <a href="{{ url_for('main.create_appointment') }}?patient_id={{ patient.id }}" class="btn btn-primary">
+                            <i class="fas fa-calendar-plus me-2"></i>Book First Appointment
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Medical Record Details Modal -->
+<div class="modal fade" id="recordDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-medical-alt me-2"></i>Medical Record Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="recordDetailsContent">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Access Code Modal -->
+<div class="modal fade" id="accessCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-key me-2"></i>Patient Access Code
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="display-4 text-primary mb-3" id="accessCodeDisplay"></div>
+                <p class="text-muted">Share this code with the patient for dashboard access</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-qrcode me-2"></i>Appointment QR Code
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid" style="max-width: 300px;">
+                <p class="mt-3 text-muted">Scan this code for quick check-in</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showRecordDetails(recordId) {
+    // This would load detailed record information
+    const modal = new bootstrap.Modal(document.getElementById('recordDetailsModal'));
+    document.getElementById('recordDetailsContent').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+    modal.show();
+    
+    // In a real implementation, this would fetch record details via AJAX
+    setTimeout(() => {
+        document.getElementById('recordDetailsContent').innerHTML = '<p>Detailed medical record information would be displayed here.</p>';
+    }, 1000);
+}
+
+function showAccessCode(accessCode) {
+    const modal = new bootstrap.Modal(document.getElementById('accessCodeModal'));
+    document.getElementById('accessCodeDisplay').textContent = accessCode;
+    modal.show();
+}
+
+function showQRCode(qrCodePath) {
+    const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+    const qrImage = document.getElementById('qrCodeImage');
+    qrImage.src = qrCodePath;
+    modal.show();
+}
+
+// Timeline styling
+const timelineItems = document.querySelectorAll('.timeline-item');
+timelineItems.forEach((item, index) => {
+    item.style.animationDelay = `${index * 0.1}s`;
+    item.classList.add('fade-in-up');
+});
+</script>
+
+<style>
+.timeline {
+    position: relative;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 3rem;
+    padding-bottom: 2rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 12px;
+    bottom: -2rem;
+    width: 2px;
+    background: var(--border-grey);
+}
+
+.timeline-content {
+    background: var(--lightest-grey);
+    border-radius: 12px;
+    padding: 1rem;
+    border-left: 4px solid var(--primary-grey);
+}
+</style>
+{% endblock %}

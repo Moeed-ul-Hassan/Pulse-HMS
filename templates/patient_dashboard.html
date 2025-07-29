@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard - {{ patient.full_name }} - Pulse HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Patient Header -->
+    <div class="patient-dashboard">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="patient-welcome">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <div class="patient-avatar bg-white text-primary rounded-circle mx-auto" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold;">
+                                    {{ patient.first_name[0] }}{{ patient.last_name[0] }}
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h2 class="mb-2">Welcome, {{ patient.first_name }}!</h2>
+                                <p class="mb-1 opacity-75">
+                                    <strong>Patient ID:</strong> {{ patient.patient_id }} | 
+                                    <strong>Age:</strong> {{ patient.age }} years
+                                </p>
+                                <p class="mb-0 opacity-75">
+                                    Access this dashboard anytime with your phone number and access code
+                                </p>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <a href="{{ url_for('auth.patient_logout') }}" class="btn btn-light">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="row">
+            <!-- Upcoming Appointments -->
+            <div class="col-lg-6 mb-4">
+                <div class="patient-card">
+                    <h5 class="mb-4">
+                        <i class="fas fa-calendar-alt me-2"></i>Upcoming Appointments
+                    </h5>
+                    
+                    {% if upcoming_appointments %}
+                    <div class="space-y-3">
+                        {% for appointment in upcoming_appointments %}
+                        <div class="appointment-card bg-white rounded p-3 mb-3" style="color: var(--primary-grey);">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="h6 mb-1">{{ appointment.appointment_date.strftime('%B %d, %Y') }}</div>
+                                    <div class="text-muted mb-2">{{ appointment.appointment_date.strftime('%I:%M %p') }} - {{ appointment.type }}</div>
+                                    {% if appointment.doctor %}
+                                    <div class="small">
+                                        <i class="fas fa-user-md me-1"></i>Dr. {{ appointment.doctor.full_name }}
+                                    </div>
+                                    {% endif %}
+                                    {% if appointment.reason %}
+                                    <div class="small text-muted mt-1">{{ appointment.reason }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge badge-{{ appointment.status }}">{{ appointment.status.title() }}</span>
+                                    {% if appointment.qr_code %}
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="showQRCode('{{ appointment.qr_code }}')">
+                                            <i class="fas fa-qrcode"></i> QR
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Appointment reminder -->
+                            {% set time_until = (appointment.appointment_date - moment.utcnow()).total_seconds() %}
+                            {% if time_until > 0 and time_until < 86400 %}
+                            <div class="alert alert-warning mt-2 mb-0">
+                                <i class="fas fa-clock me-2"></i>Reminder: Appointment in less than 24 hours
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4" style="color: rgba(255, 255, 255, 0.8);">
+                        <i class="fas fa-calendar-times fa-3x mb-3 opacity-50"></i>
+                        <h6>No upcoming appointments</h6>
+                        <p class="mb-0">Contact the hospital to schedule your next visit</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Lab Results -->
+            <div class="col-lg-6 mb-4">
+                <div class="patient-card">
+                    <h5 class="mb-4">
+                        <i class="fas fa-flask me-2"></i>Recent Lab Results
+                    </h5>
+                    
+                    {% if recent_lab_results %}
+                    <div class="space-y-3">
+                        {% for result in recent_lab_results %}
+                        <div class="lab-result-card bg-white rounded p-3 mb-3" style="color: var(--primary-grey);">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="h6 mb-1">{{ result.test_name }}</div>
+                                    <div class="text-muted mb-2">{{ result.test_date.strftime('%B %d, %Y') }}</div>
+                                    <div class="small">
+                                        <span class="badge badge-{{ result.status }}">{{ result.status.title() }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="downloadReport({{ result.id }})">
+                                        <i class="fas fa-download me-1"></i>Download
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {% if result.results %}
+                            <div class="mt-3">
+                                <div class="small text-muted">Key Results:</div>
+                                {% for key, value in result.results.items() %}
+                                <div class="small">{{ key }}: {{ value }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4" style="color: rgba(255, 255, 255, 0.8);">
+                        <i class="fas fa-flask fa-3x mb-3 opacity-50"></i>
+                        <h6>No lab results</h6>
+                        <p class="mb-0">Lab results will appear here when available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Prescriptions -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-pills me-2"></i>Recent Prescriptions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_records %}
+                        <div class="row">
+                            {% for record in recent_records %}
+                            {% if record.prescriptions %}
+                            <div class="col-md-4 mb-4">
+                                <div class="prescription-card border rounded p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <div class="h6 mb-1">{{ record.record_date.strftime('%B %d, %Y') }}</div>
+                                            {% if record.doctor %}
+                                            <div class="small text-muted">Dr. {{ record.doctor.full_name }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="printPrescription({{ record.id }})">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="prescriptions-list">
+                                        {% if record.prescriptions is string %}
+                                        <div class="prescription-item p-2 bg-light rounded mb-2">
+                                            <div class="small">{{ record.prescriptions }}</div>
+                                        </div>
+                                        {% else %}
+                                        {% for prescription in record.prescriptions %}
+                                        <div class="prescription-item p-2 bg-light rounded mb-2">
+                                            <div class="small fw-bold">{{ prescription.medication if prescription.medication else prescription }}</div>
+                                            {% if prescription.dosage %}
+                                            <div class="small text-muted">{{ prescription.dosage }}</div>
+                                            {% endif %}
+                                            {% if prescription.frequency %}
+                                            <div class="small text-muted">{{ prescription.frequency }}</div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-pills fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No prescriptions</h6>
+                            <p class="text-muted">Your prescription history will appear here</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Summary -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-heart me-2"></i>Health Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="health-stat text-center">
+                                    <div class="h4 text-danger">{{ patient.blood_type or 'Unknown' }}</div>
+                                    <div class="text-muted">Blood Type</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="health-stat text-center">
+                                    <div class="h4 text-primary">{{ patient.age }}</div>
+                                    <div class="text-muted">Age</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="health-stat text-center">
+                                    <div class="h4 text-success">{{ recent_records|length }}</div>
+                                    <div class="text-muted">Recent Visits</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="health-stat text-center">
+                                    <div class="h4 text-warning">{{ upcoming_appointments|length }}</div>
+                                    <div class="text-muted">Upcoming</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if patient.allergies and patient.allergies != 'None reported' %}
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Allergies</h6>
+                            <p class="mb-0">{{ patient.allergies }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if patient.emergency_contact %}
+                        <div class="mt-3">
+                            <h6><i class="fas fa-phone me-2"></i>Emergency Contact</h6>
+                            <p class="mb-0">{{ patient.emergency_contact }} - {{ patient.emergency_phone or 'No phone number' }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Important Information -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Important Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Hospital Contact</h6>
+                                <p class="mb-2">
+                                    <i class="fas fa-phone me-2"></i>Emergency: 911<br>
+                                    <i class="fas fa-phone me-2"></i>General: (555) 123-4567<br>
+                                    <i class="fas fa-envelope me-2"></i>info@pulsehms.com
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Access Information</h6>
+                                <p class="mb-2">
+                                    <strong>Your Access Code:</strong> {{ patient.access_code }}<br>
+                                    <small class="text-muted">Use this code with your phone number to access this dashboard</small>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h6>Privacy Notice</h6>
+                            <p class="mb-0 small text-muted">
+                                Your health information is protected and secure. This dashboard provides read-only access to your medical information. 
+                                For any changes or concerns, please contact your healthcare provider directly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-qrcode me-2"></i>Appointment QR Code
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid" style="max-width: 300px;">
+                <p class="mt-3 text-muted">Show this code at reception for quick check-in</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showQRCode(qrCodePath) {
+    const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+    const qrImage = document.getElementById('qrCodeImage');
+    qrImage.src = qrCodePath;
+    modal.show();
+}
+
+function downloadReport(reportId) {
+    // Trigger download of lab report
+    window.open(`/api/lab-report/${reportId}/download`, '_blank');
+}
+
+function printPrescription(recordId) {
+    // Open prescription in new window for printing
+    window.open(`/print/prescription/${recordId}`, '_blank');
+}
+
+// Initialize appointment reminders
+document.addEventListener('DOMContentLoaded', function() {
+    const appointmentCards = document.querySelectorAll('.appointment-card');
+    appointmentCards.forEach(card => {
+        card.style.animationDelay = `${Array.from(appointmentCards).indexOf(card) * 0.1}s`;
+        card.classList.add('fade-in-up');
+    });
+    
+    // Check for urgent appointments
+    const urgentReminders = document.querySelectorAll('.alert-warning');
+    urgentReminders.forEach(reminder => {
+        reminder.classList.add('pulse');
+    });
+});
+
+// Add current time display
+function updateTime() {
+    const now = new Date();
+    const timeElement = document.querySelector('.current-time');
+    if (timeElement) {
+        timeElement.textContent = now.toLocaleString();
+    }
+}
+
+setInterval(updateTime, 60000); // Update every minute
+updateTime(); // Initial call
+</script>
+
+<style>
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+.health-stat {
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--lightest-grey);
+}
+
+.prescription-card {
+    transition: all 0.3s ease;
+}
+
+.prescription-card:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-2px);
+}
+
+.patient-card {
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.appointment-card,
+.lab-result-card {
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+}
+
+.appointment-card:hover,
+.lab-result-card:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

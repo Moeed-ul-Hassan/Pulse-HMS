@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Appointments - Pulse HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1 fade-in-up">
+                        <i class="fas fa-calendar-alt me-2 text-primary"></i>Appointments
+                    </h1>
+                    <p class="text-muted mb-0">Manage patient appointments and schedules</p>
+                </div>
+                {% if current_user.has_role('admin') or current_user.has_role('receptionist') or current_user.has_role('doctor') %}
+                <div>
+                    <a href="{{ url_for('main.create_appointment') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>New Appointment
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="date" name="date" value="{{ request.args.get('date', '') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Statuses</option>
+                                <option value="scheduled" {% if request.args.get('status') == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                                <option value="arrived" {% if request.args.get('status') == 'arrived' %}selected{% endif %}>Arrived</option>
+                                <option value="in_progress" {% if request.args.get('status') == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="cancelled" {% if request.args.get('status') == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" placeholder="Patient name or ID" value="{{ request.args.get('search', '') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Filter
+                                </button>
+                                <a href="{{ url_for('main.appointments') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Clear
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Appointment List
+                        <span class="badge bg-secondary ms-2">{{ appointments.total }} total</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if appointments.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="appointmentsList">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Date & Time</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments.items %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ appointment.appointment_id }}</strong>
+                                        {% if appointment.sync_status == 'pending' %}
+                                        <span class="badge badge-warning ms-2">Offline</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-primary text-white rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                {{ appointment.patient.first_name[0] }}{{ appointment.patient.last_name[0] }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ appointment.patient.full_name }}</div>
+                                                <small class="text-muted">{{ appointment.patient.patient_id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if appointment.doctor %}
+                                            <div class="fw-bold">{{ appointment.doctor.full_name }}</div>
+                                            <small class="text-muted">{{ appointment.doctor.role.description }}</small>
+                                        {% else %}
+                                            <span class="text-muted">Not assigned</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">{{ appointment.appointment_date.strftime('%Y-%m-%d') }}</div>
+                                        <small class="text-muted">{{ appointment.appointment_date.strftime('%I:%M %p') }} ({{ appointment.duration }}min)</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ appointment.type }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ appointment.status }}">
+                                            {{ appointment.status.replace('_', ' ').title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            {% if current_user.has_role('receptionist') or current_user.has_role('admin') %}
+                                                {% if appointment.status == 'scheduled' %}
+                                                <button class="btn btn-sm btn-success status-update-btn" 
+                                                        data-appointment-id="{{ appointment.appointment_id }}" 
+                                                        data-new-status="arrived"
+                                                        title="Mark as Arrived">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                {% endif %}
+                                            {% endif %}
+                                            
+                                            <a href="{{ url_for('main.patient_detail', patient_id=appointment.patient.id) }}" 
+                                               class="btn btn-sm btn-outline-primary" title="View Patient">
+                                                <i class="fas fa-user"></i>
+                                            </a>
+                                            
+                                            {% if appointment.qr_code %}
+                                            <button class="btn btn-sm btn-outline-secondary" 
+                                                    onclick="showQRCode('{{ appointment.qr_code }}')" 
+                                                    title="Show QR Code">
+                                                <i class="fas fa-qrcode"></i>
+                                            </button>
+                                            {% endif %}
+                                            
+                                            <a href="{{ url_for('main.print_resource', resource_type='appointment', resource_id=appointment.id) }}" 
+                                               class="btn btn-sm btn-outline-info" target="_blank" title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if appointments.pages > 1 %}
+                    <div class="card-footer">
+                        <nav aria-label="Appointments pagination">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if appointments.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.appointments', page=appointments.prev_num, **request.args) }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for page_num in appointments.iter_pages() %}
+                                    {% if page_num %}
+                                        {% if page_num != appointments.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('main.appointments', page=page_num, **request.args) }}">{{ page_num }}</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                        {% endif %}
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if appointments.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.appointments', page=appointments.next_num, **request.args) }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No appointments found</h5>
+                        <p class="text-muted">Try adjusting your filters or create a new appointment.</p>
+                        {% if current_user.has_role('admin') or current_user.has_role('receptionist') or current_user.has_role('doctor') %}
+                        <a href="{{ url_for('main.create_appointment') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create Appointment
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-qrcode me-2"></i>Appointment QR Code
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid" style="max-width: 300px;">
+                <p class="mt-3 text-muted">Scan this code for quick check-in</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Status update functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const statusButtons = document.querySelectorAll('.status-update-btn');
+    
+    statusButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const appointmentId = this.dataset.appointmentId;
+            const newStatus = this.dataset.newStatus;
+            
+            // Update status (this would normally be a form submission or AJAX call)
+            if (navigator.onLine) {
+                // Online: submit form or make AJAX call
+                window.location.href = `/appointments/${appointmentId}/update-status?status=${newStatus}`;
+            } else {
+                // Offline: use offline manager
+                if (window.OfflineManager) {
+                    window.OfflineManager.updateAppointmentStatusOffline(appointmentId, newStatus);
+                    this.textContent = newStatus.toUpperCase();
+                    this.className = `btn btn-sm badge-${newStatus}`;
+                    
+                    if (window.PulseHMS) {
+                        window.PulseHMS.showNotification('Status updated offline', 'info');
+                    }
+                }
+            }
+        });
+    });
+});
+
+// QR Code display
+function showQRCode(qrCodePath) {
+    const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+    const qrImage = document.getElementById('qrCodeImage');
+    qrImage.src = qrCodePath;
+    modal.show();
+}
+</script>
+{% endblock %}

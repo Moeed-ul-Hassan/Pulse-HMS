@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}Patients - Pulse HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1 fade-in-up">
+                        <i class="fas fa-users me-2 text-primary"></i>Patients
+                    </h1>
+                    <p class="text-muted mb-0">Manage patient records and information</p>
+                </div>
+                {% if current_user.has_role('admin') or current_user.has_role('receptionist') %}
+                <div>
+                    <a href="{{ url_for('main.create_patient') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Add Patient
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="search" class="form-label">Search Patients</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control search-input" id="search" name="search" 
+                                       placeholder="Name, ID, or phone number" value="{{ search }}"
+                                       data-search-type="patients">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="sort" class="form-label">Sort By</label>
+                            <select class="form-select" id="sort" name="sort">
+                                <option value="created_at_desc">Newest First</option>
+                                <option value="created_at_asc">Oldest First</option>
+                                <option value="name_asc">Name A-Z</option>
+                                <option value="name_desc">Name Z-A</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                                <a href="{{ url_for('main.patients') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Clear
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patients Grid -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Patient Records
+                        <span class="badge bg-secondary ms-2">{{ patients.total }} total</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if patients.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="patientsList">
+                            <thead>
+                                <tr>
+                                    <th>Patient ID</th>
+                                    <th>Patient</th>
+                                    <th>Contact</th>
+                                    <th>Age/Gender</th>
+                                    <th>Blood Type</th>
+                                    <th>Last Visit</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in patients.items %}
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">{{ patient.patient_id }}</strong>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-primary text-white rounded-circle me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                                                {{ patient.first_name[0] }}{{ patient.last_name[0] }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ patient.full_name }}</div>
+                                                <small class="text-muted">
+                                                    {% if patient.email %}
+                                                        <i class="fas fa-envelope me-1"></i>{{ patient.email }}
+                                                    {% else %}
+                                                        <span class="text-muted">No email</span>
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">
+                                            <i class="fas fa-phone me-1"></i>{{ patient.phone }}
+                                        </div>
+                                        {% if patient.emergency_contact %}
+                                        <small class="text-muted">
+                                            Emergency: {{ patient.emergency_contact }}
+                                        </small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">{{ patient.age }} years</div>
+                                        <small class="text-muted">{{ patient.gender }}</small>
+                                    </td>
+                                    <td>
+                                        {% if patient.blood_type %}
+                                        <span class="badge bg-danger">{{ patient.blood_type }}</span>
+                                        {% else %}
+                                        <span class="text-muted">Unknown</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% set last_appointment = patient.appointments.order_by('appointment_date desc').first() %}
+                                        {% if last_appointment %}
+                                        <div class="fw-bold">{{ last_appointment.appointment_date.strftime('%Y-%m-%d') }}</div>
+                                        <small class="text-muted">{{ last_appointment.type }}</small>
+                                        {% else %}
+                                        <span class="text-muted">No visits</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('main.patient_detail', patient_id=patient.id) }}" 
+                                               class="btn btn-sm btn-primary" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            
+                                            {% if current_user.has_role('admin') or current_user.has_role('receptionist') or current_user.has_role('doctor') %}
+                                            <a href="{{ url_for('main.create_appointment') }}?patient_id={{ patient.id }}" 
+                                               class="btn btn-sm btn-success" title="Book Appointment">
+                                                <i class="fas fa-calendar-plus"></i>
+                                            </a>
+                                            {% endif %}
+                                            
+                                            {% if patient.access_code %}
+                                            <button class="btn btn-sm btn-outline-info" 
+                                                    onclick="showAccessCode('{{ patient.access_code }}')" 
+                                                    title="Patient Access Code">
+                                                <i class="fas fa-key"></i>
+                                            </button>
+                                            {% endif %}
+                                            
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                        data-bs-toggle="dropdown" title="More Actions">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" href="#">
+                                                            <i class="fas fa-edit me-2"></i>Edit Patient
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ url_for('main.print_resource', resource_type='patient', resource_id=patient.id) }}" target="_blank">
+                                                            <i class="fas fa-print me-2"></i>Print Summary
+                                                        </a>
+                                                    </li>
+                                                    {% if patient.access_code %}
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" onclick="generatePatientQR('{{ patient.id }}')">
+                                                            <i class="fas fa-qrcode me-2"></i>Patient QR Code
+                                                        </a>
+                                                    </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if patients.pages > 1 %}
+                    <div class="card-footer">
+                        <nav aria-label="Patients pagination">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if patients.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.patients', page=patients.prev_num, search=search) }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for page_num in patients.iter_pages() %}
+                                    {% if page_num %}
+                                        {% if page_num != patients.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('main.patients', page=page_num, search=search) }}">{{ page_num }}</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                        {% endif %}
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if patients.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.patients', page=patients.next_num, search=search) }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No patients found</h5>
+                        {% if search %}
+                        <p class="text-muted">No patients match your search criteria.</p>
+                        <a href="{{ url_for('main.patients') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-times me-2"></i>Clear Search
+                        </a>
+                        {% else %}
+                        <p class="text-muted">Get started by adding your first patient.</p>
+                        {% if current_user.has_role('admin') or current_user.has_role('receptionist') %}
+                        <a href="{{ url_for('main.create_patient') }}" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>Add First Patient
+                        </a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Access Code Modal -->
+<div class="modal fade" id="accessCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-key me-2"></i>Patient Access Code
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="display-4 text-primary mb-3" id="accessCodeDisplay"></div>
+                <p class="text-muted">Share this code with the patient for dashboard access</p>
+                <div class="mt-3">
+                    <button class="btn btn-outline-primary" onclick="copyAccessCode()">
+                        <i class="fas fa-copy me-2"></i>Copy Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Access code functionality
+function showAccessCode(accessCode) {
+    const modal = new bootstrap.Modal(document.getElementById('accessCodeModal'));
+    document.getElementById('accessCodeDisplay').textContent = accessCode;
+    modal.show();
+}
+
+function copyAccessCode() {
+    const accessCode = document.getElementById('accessCodeDisplay').textContent;
+    navigator.clipboard.writeText(accessCode).then(function() {
+        if (window.PulseHMS) {
+            window.PulseHMS.showNotification('Access code copied to clipboard', 'success');
+        }
+    });
+}
+
+function generatePatientQR(patientId) {
+    // This would generate a QR code for patient dashboard access
+    if (window.PulseHMS) {
+        window.PulseHMS.showNotification('QR code generation not implemented yet', 'info');
+    }
+}
+
+// Enhanced search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length > 2) {
+                searchTimeout = setTimeout(() => {
+                    // Perform live search (in a real app, this would be AJAX)
+                    console.log('Searching for:', query);
+                }, 300);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
