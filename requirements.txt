@@ -1,5 +1,6 @@
 # Pulse HMS - Hospital Management System
 # Requirements file for Python dependencies
+# Team Legends - Coder Moeed-ul-Hassan, Cursor AI, Render
 
 # Core Flask Framework
 Flask==2.3.3
@@ -49,12 +50,45 @@ itsdangerous==2.1.2
 Jinja2==3.1.2
 MarkupSafe==2.1.3
 
-# Optional: Additional Features
-# Redis for caching (uncomment if needed)
+# Additional Features for Enhanced Functionality
+Flask-CORS==4.0.0
+Flask-Limiter==3.5.0
+Flask-Talisman==1.1.0
+
+# Data Visualization (for Analytics Dashboard)
+matplotlib==3.7.2
+seaborn==0.12.2
+
+# File Upload & Processing
+python-magic==0.4.27
+
+# Environment Management
+python-decouple==3.8
+
+# Optional: Additional Features (uncomment as needed)
+# Redis for caching and session storage
 # redis==5.0.1
 
-# Celery for background tasks (uncomment if needed)
+# Celery for background tasks and job queues
 # celery==5.3.4
 
-# Email support (uncomment if needed)
-# Flask-Mail==0.9.1 
+# Email support for notifications
+# Flask-Mail==0.9.1
+
+# PostgreSQL adapter (for production database)
+# psycopg2-binary==2.9.7
+
+# MongoDB support (for document storage)
+# pymongo==4.5.0
+
+# Elasticsearch for advanced search
+# elasticsearch==8.9.0
+
+# AWS SDK for cloud services
+# boto3==1.28.44
+
+# Google Cloud SDK
+# google-cloud-storage==2.10.0
+
+# Microsoft Azure SDK
+# azure-storage-blob==12.17.0 
