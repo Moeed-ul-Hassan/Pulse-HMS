@@ -15,7 +15,7 @@
                     <p class="text-muted mb-0">Welcome back, {{ current_user.full_name }}</p>
                 </div>
                 <div class="text-end">
-                    <p class="mb-0 text-muted"><i class="fas fa-clock me-2"></i>{{ moment().format('MMMM Do YYYY, h:mm a') }}</p>
+                    <p class="mb-0 text-muted"><i class="fas fa-clock me-2"></i>{{ current_time }}</p>
                     <p class="mb-0"><span class="badge bg-primary">{{ current_user.role.description }}</span></p>
                 </div>
             </div>

@@ -60,7 +60,9 @@ def dashboard():
             ).count()
         }
     
-    return render_template('dashboard.html', dashboard_data=dashboard_data)
+    return render_template('dashboard.html', 
+                         dashboard_data=dashboard_data,
+                         current_time=datetime.now().strftime('%B %d, %Y at %I:%M %p'))
 
 @main_bp.route('/appointments')
 @login_required
