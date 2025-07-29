@@ -730,10 +730,11 @@ body.authenticated .flash-messages {
     z-index: 1039;
 }
 
-/* Mobile Responsive */
+/* Enhanced Mobile Responsive */
 @media (max-width: 768px) {
     .modern-sidebar {
         transform: translateX(-100%);
+        width: 280px;
     }
     
     .modern-sidebar.show {
@@ -746,7 +747,7 @@ body.authenticated .flash-messages {
     
     .main-content {
         margin-left: 0;
-        padding: 0.25rem 0.5rem;
+        padding: 0.5rem;
         margin-top: 0;
     }
     
@@ -756,10 +757,54 @@ body.authenticated .flash-messages {
     
     .top-navbar {
         height: 60px;
+        padding: 0 1rem;
     }
     
     .main-wrapper {
         margin-top: 60px;
+    }
+    
+    /* Enhanced card responsiveness */
+    .card {
+        margin-bottom: 1rem;
+        border-radius: var(--radius-lg);
+    }
+    
+    .dashboard-card {
+        padding: var(--spacing-lg);
+        margin-bottom: 1rem;
+    }
+    
+    /* Improved table responsiveness */
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    /* Better form responsiveness */
+    .form-control {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 0.75rem;
+    }
+    
+    /* Enhanced button responsiveness */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Improved navbar responsiveness */
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .sidebar-toggle {
+        width: 40px;
+        height: 40px;
     }
 }
 

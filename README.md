@@ -191,21 +191,25 @@ python main.py
 
 <div align="center">
 
-### **Modern Dashboard Interface**
+### **🏥 Modern Dashboard Interface**
 
-![Dashboard](https://via.placeholder.com/400x250/667eea/ffffff?text=Dashboard)
+![Pulse HMS Dashboard](assets/Images/HMS-S-1.JPG)
 
-### **Patient Management**
+### **👥 Patient Management System**
 
-![Patients](https://via.placeholder.com/400x250/4CAF50/ffffff?text=Patient+Management)
+![Patient Management](assets/Images/HMS-S-2.JPG)
 
-### **Appointment Scheduling**
+### **📅 Appointment Scheduling**
 
-![Appointments](https://via.placeholder.com/400x250/FF9800/ffffff?text=Appointments)
+![Appointment System](assets/Images/HMS-S-3.JPG)
 
-### **Analytics Dashboard**
+### **📊 Analytics Dashboard**
 
-![Analytics](https://via.placeholder.com/400x250/9C27B0/ffffff?text=Analytics)
+![Analytics Dashboard](assets/Images/HMS-S-4.JPG)
+
+### **🎨 Glassmorphism UI Design**
+
+![Modern UI Design](assets/Images/HMS-S-5.JPG)
 
 </div>
 
