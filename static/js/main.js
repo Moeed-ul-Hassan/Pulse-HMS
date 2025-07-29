@@ -96,10 +96,57 @@ function initializeSmoothScrolling() {
         });
     }
     
-    // Enhanced navbar scroll effects
+    // Enhanced navbar scroll effects and responsive improvements
     const navbar = document.querySelector('.top-navbar');
     if (navbar) {
         let lastScrollTop = 0;
+        
+        // Responsive sidebar toggle
+        function handleSidebarToggle() {
+            const sidebar = document.querySelector('.modern-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                
+                // Prevent body scroll when sidebar is open on mobile
+                if (sidebar.classList.contains('show')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+        
+        // Close sidebar when clicking overlay
+        document.addEventListener('click', function(e) {
+            const overlay = document.querySelector('.sidebar-overlay');
+            const sidebar = document.querySelector('.modern-sidebar');
+            
+            if (e.target === overlay && sidebar) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Handle window resize
+        function handleResize() {
+            const sidebar = document.querySelector('.modern-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (window.innerWidth > 768) {
+                if (sidebar) sidebar.classList.remove('show');
+                if (overlay) overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        window.addEventListener('resize', handleResize);
+        
+        // Make sidebar toggle globally available
+        window.toggleSidebar = handleSidebarToggle;
         
         window.addEventListener('scroll', () => {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -111,16 +158,39 @@ function initializeSmoothScrolling() {
                 navbar.classList.remove('scrolled');
             }
             
-            // Hide/show navbar on scroll (optional)
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scrolling down
-                navbar.style.transform = 'translateY(-100%)';
-            } else {
-                // Scrolling up
-                navbar.style.transform = 'translateY(0)';
+            // Hide/show navbar on scroll (only on mobile)
+            if (window.innerWidth <= 768) {
+                if (scrollTop > lastScrollTop && scrollTop > 100) {
+                    // Scrolling down
+                    navbar.style.transform = 'translateY(-100%)';
+                } else {
+                    // Scrolling up
+                    navbar.style.transform = 'translateY(0)';
+                }
             }
             
             lastScrollTop = scrollTop;
+        });
+    }
+    
+    // Touch-friendly improvements
+    if ('ontouchstart' in window) {
+        // Add touch feedback to buttons
+        const buttons = document.querySelectorAll('.btn, .nav-link, .dropdown-item');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+            });
+            
+            button.addEventListener('touchend', function() {
+                this.style.transform = '';
+            });
+        });
+        
+        // Improve table scrolling on touch devices
+        const tables = document.querySelectorAll('.table-responsive');
+        tables.forEach(table => {
+            table.style.webkitOverflowScrolling = 'touch';
         });
     }
 }

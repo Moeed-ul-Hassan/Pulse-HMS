@@ -1315,18 +1315,159 @@ body.authenticated .flash-messages {
     
     .card {
         margin-bottom: 0.75rem;
+        border-radius: var(--radius-md);
     }
     
     .dashboard-card {
         margin-bottom: 0.75rem;
+        padding: var(--spacing-md);
     }
     
     .top-navbar {
-        height: 60px;
+        height: 55px;
+        padding: 0 0.5rem;
     }
     
     .main-wrapper {
-        margin-top: 60px;
+        margin-top: 55px;
+    }
+    
+    /* Ultra-compact mobile design */
+    .card-body {
+        padding: var(--spacing-md);
+    }
+    
+    .card-header {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.9rem;
+    }
+    
+    /* Compact table design */
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.25rem;
+    }
+    
+    /* Compact form design */
+    .form-control {
+        padding: 0.5rem;
+        font-size: 16px;
+    }
+    
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Compact button design */
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Compact navbar */
+    .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    .sidebar-toggle {
+        width: 35px;
+        height: 35px;
+    }
+    
+    /* Hide less important elements on very small screens */
+    .d-none-xs {
+        display: none !important;
+    }
+}
+
+/* Landscape orientation for mobile devices */
+@media (max-width: 768px) and (orientation: landscape) {
+    .top-navbar {
+        height: 50px;
+    }
+    
+    .main-wrapper {
+        margin-top: 50px;
+    }
+    
+    .main-content {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .card {
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-card {
+        padding: var(--spacing-sm);
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Compact layout for landscape */
+    .card-body {
+        padding: var(--spacing-sm);
+    }
+    
+    .card-header {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.85rem;
+    }
+    
+    /* Smaller buttons for landscape */
+    .btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Compact navbar for landscape */
+    .navbar-brand {
+        font-size: 0.9rem;
+    }
+    
+    .sidebar-toggle {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* Tablet Responsive (768px - 1199px) */
+@media (min-width: 769px) and (max-width: 1199px) {
+    .main-content {
+        padding: 0.75rem 1rem;
+        margin-left: 260px;
+    }
+    
+    .modern-sidebar {
+        width: 260px;
+    }
+    
+    .card {
+        margin-bottom: 1.25rem;
+    }
+    
+    .dashboard-card {
+        padding: var(--spacing-lg);
+        margin-bottom: 1.25rem;
+    }
+    
+    /* Optimized table for tablets */
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    /* Better form layout for tablets */
+    .form-control {
+        padding: 0.75rem;
+    }
+    
+    /* Optimized button sizes for tablets */
+    .btn {
+        padding: 0.75rem 1.5rem;
     }
 }
 
@@ -1716,6 +1857,71 @@ body.authenticated .flash-messages {
 .row .col-lg-8,
 .row .col-md-6 {
     margin-bottom: 1rem;
+}
+
+/* Touch-friendly improvements for mobile */
+@media (max-width: 768px) {
+    /* Larger touch targets */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .nav-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .sidebar-toggle {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Better touch scrolling */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+        overflow-scrolling: touch;
+    }
+    
+    /* Improved form touch targets */
+    .form-control {
+        min-height: 44px;
+    }
+    
+    .form-check-input {
+        min-width: 20px;
+        min-height: 20px;
+    }
+    
+    /* Better dropdown touch targets */
+    .dropdown-item {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Improved card touch interactions */
+    .card {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    
+    .card:active {
+        transform: scale(0.98);
+    }
+    
+    /* Better modal touch targets */
+    .modal-header .btn-close {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    /* Improved sidebar touch targets */
+    .sidebar-close {
+        min-width: 44px;
+        min-height: 44px;
+    }
 }
 
 @media print {
