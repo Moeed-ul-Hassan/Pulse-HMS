@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, send_file
 from flask_login import login_required, current_user
 from datetime import datetime, date, timedelta
+from security import secure_endpoint, layer_1_rate_limiting, layer_4_input_validation
 import json
 import io
 from models import User, Patient, Appointment, MedicalRecord, LabResult, Role
@@ -19,6 +20,8 @@ def index():
 
 @main_bp.route('/dashboard')
 @login_required
+@layer_1_rate_limiting(max_requests=50, window=60)
+@layer_4_input_validation()
 def dashboard():
     # Role-based dashboard data
     dashboard_data = {}
@@ -225,6 +228,8 @@ def create_patient():
 
 @main_bp.route('/patients/<int:patient_id>')
 @login_required
+@layer_1_rate_limiting(max_requests=30, window=60)
+@layer_4_input_validation()
 def patient_detail(patient_id):
     patient = Patient.query.get_or_404(patient_id)
     
@@ -352,6 +357,13 @@ def print_resource(resource_type, resource_id):
     
     flash('Invalid print resource', 'error')
     return redirect(url_for('main.dashboard'))
+
+@main_bp.route('/api/security-status')
+@login_required
+@requires_role(['admin'])
+def security_status():
+    from security import get_security_status
+    return jsonify(get_security_status())
 
 @main_bp.route('/api/offline-sync', methods=['POST'])
 @login_required

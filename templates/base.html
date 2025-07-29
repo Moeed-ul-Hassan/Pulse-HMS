@@ -20,6 +20,9 @@
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     
+    <!-- Preloader Script -->
+    <script src="{{ url_for('static', filename='js/preloader.js') }}" defer></script>
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body class="{% if current_user.is_authenticated %}authenticated{% endif %}">
