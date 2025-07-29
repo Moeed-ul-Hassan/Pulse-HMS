@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Pulse HMS{% endblock %}
+{% block title %}Patient Access - Pulse HMS{% endblock %}
 
 {% block content %}
 <div class="login-container">
@@ -14,7 +14,7 @@
         </div>
     </div>
     
-    <!-- Main Login Content -->
+    <!-- Main Patient Access Content -->
     <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
         <div class="row w-100 justify-content-center">
             <div class="col-11 col-sm-10 col-md-8 col-lg-6 col-xl-5">
@@ -22,60 +22,48 @@
                     <!-- Logo and Title Section -->
                     <div class="login-header text-center mb-4">
                         <div class="logo-container mb-3">
-                            <i class="fas fa-heartbeat logo-icon"></i>
+                            <i class="fas fa-user-injured logo-icon"></i>
                         </div>
-                        <h1 class="login-title">Pulse HMS</h1>
-                        <p class="login-subtitle">Modern Hospital Management System</p>
+                        <h1 class="login-title">Patient Access</h1>
+                        <p class="login-subtitle">Access your medical information</p>
                     </div>
                     
-                    <!-- Login Form -->
+                    <!-- Patient Access Form -->
                     <form method="POST" class="login-form needs-validation" novalidate>
                         <div class="form-group mb-3">
-                            <label for="username" class="form-label">
-                                <i class="fas fa-user me-2"></i>Username
+                            <label for="phone" class="form-label">
+                                <i class="fas fa-phone me-2"></i>Phone Number
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-user"></i>
+                                    <i class="fas fa-phone"></i>
                                 </span>
-                                <input type="text" class="form-control" id="username" name="username" 
-                                       placeholder="Enter your username" required>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       placeholder="Enter your phone number" required>
                             </div>
                             <div class="invalid-feedback">
-                                Please enter your username.
+                                Please enter your phone number.
                             </div>
                         </div>
                         
                         <div class="form-group mb-3">
-                            <label for="password" class="form-label">
-                                <i class="fas fa-lock me-2"></i>Password
+                            <label for="access_code" class="form-label">
+                                <i class="fas fa-key me-2"></i>Access Code
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-lock"></i>
+                                    <i class="fas fa-key"></i>
                                 </span>
-                                <input type="password" class="form-control" id="password" name="password" 
-                                       placeholder="Enter your password" required>
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                                <input type="text" class="form-control" id="access_code" name="access_code" 
+                                       placeholder="Enter your access code" required>
                             </div>
                             <div class="invalid-feedback">
-                                Please enter your password.
-                            </div>
-                        </div>
-                        
-                        <div class="form-group mb-3">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
-                                <label class="form-check-label" for="remember_me">
-                                    Remember me
-                                </label>
+                                Please enter your access code.
                             </div>
                         </div>
                         
                         <button type="submit" class="btn btn-primary btn-login w-100 mb-3">
-                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            <i class="fas fa-sign-in-alt me-2"></i>Access Dashboard
                         </button>
                     </form>
                     
@@ -84,29 +72,26 @@
                         <span>or</span>
                     </div>
                     
-                    <!-- Patient Access -->
+                    <!-- Staff Access -->
                     <div class="text-center mb-4">
-                        <p class="text-muted mb-2">Patient Access</p>
-                        <a href="{{ url_for('auth.patient_access') }}" class="btn btn-outline-primary btn-patient">
-                            <i class="fas fa-mobile-alt me-2"></i>Patient Dashboard
+                        <p class="text-muted mb-2">Staff Access</p>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-patient">
+                            <i class="fas fa-user-md me-2"></i>Staff Login
                         </a>
                     </div>
                     
-                    <!-- Demo Credentials -->
+                    <!-- Information -->
                     <div class="demo-credentials">
                         <div class="demo-header">
                             <i class="fas fa-info-circle me-2"></i>
-                            <span>Demo Credentials</span>
+                            <span>How to Access</span>
                         </div>
                         <div class="demo-content">
                             <div class="demo-item">
-                                <strong>Admin:</strong> admin / admin123
+                                Contact the hospital reception to get your access code.
                             </div>
                             <div class="demo-item">
-                                <strong>Doctor:</strong> doctor / doctor123
-                            </div>
-                            <div class="demo-item">
-                                <strong>Receptionist:</strong> reception / reception123
+                                You'll need your registered phone number and the access code provided to you.
                             </div>
                         </div>
                     </div>
@@ -192,12 +177,10 @@
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    padding: 3rem;
+    padding: 2rem;
     position: relative;
     z-index: 2;
     transition: all 0.3s ease;
-    max-width: 600px;
-    margin: 0 auto;
 }
 
 .login-card:hover {
@@ -358,7 +341,7 @@
 /* Responsive Design */
 @media (max-width: 576px) {
     .login-card {
-        padding: 2rem;
+        padding: 1.5rem;
         margin: 1rem;
     }
     
@@ -382,7 +365,7 @@
 
 @media (max-width: 768px) {
     .login-card {
-        padding: 2.5rem;
+        padding: 1.75rem;
     }
     
     .login-title {
@@ -392,7 +375,7 @@
 
 @media (min-width: 1200px) {
     .login-card {
-        padding: 4rem;
+        padding: 2.5rem;
     }
     
     .login-title {
@@ -436,23 +419,8 @@
 </style>
 
 <script>
-// Password visibility toggle
+// Form validation
 document.addEventListener('DOMContentLoaded', function() {
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-    
-    if (togglePassword && passwordInput) {
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            
-            const icon = this.querySelector('i');
-            icon.classList.toggle('fa-eye');
-            icon.classList.toggle('fa-eye-slash');
-        });
-    }
-    
-    // Form validation
     const form = document.querySelector('.needs-validation');
     if (form) {
         form.addEventListener('submit', function(event) {
@@ -464,11 +432,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Auto-focus on username field
-    const usernameInput = document.getElementById('username');
-    if (usernameInput) {
-        usernameInput.focus();
+    // Auto-focus on phone field
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.focus();
     }
 });
 </script>
-{% endblock %}
+{% endblock %} 

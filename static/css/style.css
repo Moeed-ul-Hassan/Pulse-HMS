@@ -301,6 +301,31 @@ body {
     box-shadow: var(--shadow-soft);
 }
 
+/* Flash messages for non-authenticated users */
+body:not(.authenticated) .flash-messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    max-width: 400px;
+    margin-bottom: 0;
+}
+
+/* Flash messages for all users */
+.flash-messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    max-width: 400px;
+    margin-bottom: 0;
+}
+
+/* Flash messages for authenticated users (adjust position) */
+body.authenticated .flash-messages {
+    top: 80px;
+}
+
 /* Sidebar Overlay for Mobile */
 .sidebar-overlay {
     display: none;

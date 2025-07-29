@@ -15,7 +15,20 @@ from pydantic import BaseModel
 # The SDK was recently renamed from google-generativeai to google-genai. This file reflects the new name and the new APIs.
 
 # This API key is from Gemini Developer API Key, not vertex AI API Key
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+# Make AI services optional for development/demo
+try:
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        client = genai.Client(api_key=api_key)
+        AI_AVAILABLE = True
+    else:
+        client = None
+        AI_AVAILABLE = False
+        print("⚠️  GEMINI_API_KEY not found. AI features will be disabled.")
+except Exception as e:
+    client = None
+    AI_AVAILABLE = False
+    print(f"⚠️  AI services disabled: {e}")
 
 
 class PatientSummary(BaseModel):
@@ -54,6 +67,15 @@ class TreatmentSuggestions(BaseModel):
 
 def generate_patient_summary(patient, medical_records):
     """Generate AI summary of what's changed since last appointment"""
+    # Check if AI is available
+    if not AI_AVAILABLE or not client:
+        return {
+            "summary": "AI analysis not available. Manual review recommended.",
+            "key_changes": ["AI services disabled"],
+            "risk_level": "medium",
+            "recommendations": ["Please review patient data manually"]
+        }
+    
     try:
         if len(medical_records) < 2:
             return {
