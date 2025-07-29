@@ -147,5 +147,3 @@ Preferred communication style: Simple, everyday language.
 - Caching strategy for static QR codes
 - Offline-first appointment booking
 - Async-ready architecture foundation
-
-The system is designed to be easily deployable on platforms like Replit, Heroku, or traditional VPS environments with minimal configuration changes.
