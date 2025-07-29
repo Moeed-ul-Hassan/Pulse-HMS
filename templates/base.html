@@ -46,6 +46,25 @@
             </button>
             
             <div class="navbar-nav ms-auto">
+                <!-- Notification Icon -->
+                <div class="nav-item dropdown me-3">
+                    <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-bell"></i>
+                        <span id="notification-badge" class="notification-badge">0</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end notification-dropdown" style="width: 350px;">
+                        <div class="dropdown-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">Notifications</h6>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="notifications.markAllAsRead()">
+                                Mark all read
+                            </button>
+                        </div>
+                        <div id="notification-list" class="notification-list">
+                            <!-- Notifications will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Sync Status -->
                 <div class="nav-item me-3">
                     <span class="nav-link">
@@ -178,6 +197,26 @@
                     </li>
                     {% endif %}
                     
+                    <!-- Receipt Generator (Admin/Receptionist only) -->
+                    {% if current_user.has_role('admin') or current_user.has_role('receptionist') %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('main.receipt') }}" class="nav-link">
+                            <i class="fas fa-receipt nav-icon"></i>
+                            <span class="nav-text">Receipt Generator</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Analytics (Admin only) -->
+                    {% if current_user.has_role('admin') %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('main.analytics') }}" class="nav-link">
+                            <i class="fas fa-chart-line nav-icon"></i>
+                            <span class="nav-text">Analytics</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
                     <!-- Reports & Analytics (Admin only) -->
                     {% if current_user.has_role('admin') %}
                     <li class="nav-section-title">
@@ -296,6 +335,7 @@
     <!-- Custom JavaScript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/offline.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
     
     {% block extra_js %}{% endblock %}
     

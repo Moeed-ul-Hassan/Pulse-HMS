@@ -3,6 +3,7 @@
 {% block title %}Dashboard - Pulse HMS{% endblock %}
 
 {% block content %}
+<div class="container-fluid" data-animation="animate-fade-in">
 <div class="container-fluid py-4">
     <!-- Page Header -->
     <div class="row mb-4">
@@ -25,28 +26,28 @@
     <!-- Dashboard Cards -->
     <div class="row mb-4">
         {% if current_user.has_role('admin') %}
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="100">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 <i class="fas fa-users fa-2x mb-3"></i>
                 <div class="display-4">{{ dashboard_data.total_patients or 0 }}</div>
                 <h5>Total Patients</h5>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="200">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
                 <i class="fas fa-user-md fa-2x mb-3"></i>
                 <div class="display-4">{{ dashboard_data.total_users or 0 }}</div>
                 <h5>Staff Members</h5>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="300">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
                 <i class="fas fa-calendar-check fa-2x mb-3"></i>
                 <div class="display-4">{{ dashboard_data.today_appointments or 0 }}</div>
                 <h5>Today's Appointments</h5>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="400">
             <div class="dashboard-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
                 <i class="fas fa-flask fa-2x mb-3"></i>
                 <div class="display-4">{{ dashboard_data.pending_lab_results or 0 }}</div>

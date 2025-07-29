@@ -293,6 +293,23 @@ def generate_fake_data_route():
     
     return redirect(url_for('main.dashboard'))
 
+@main_bp.route('/receipt')
+@login_required
+def receipt():
+    return render_template('receipt.html')
+
+@main_bp.route('/analytics')
+@login_required
+def analytics():
+    # Mock analytics data - in real app, this would come from database
+    analytics_data = {
+        'total_patients': 1250,
+        'today_appointments': 45,
+        'monthly_revenue': 125000,
+        'satisfaction_rate': 94
+    }
+    return render_template('analytics.html', analytics=analytics_data)
+
 @main_bp.route('/print/<resource_type>/<int:resource_id>')
 @login_required
 def print_resource(resource_type, resource_id):

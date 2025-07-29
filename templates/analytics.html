@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - Pulse HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid" data-animation="animate-fade-in">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Analytics Dashboard
+                </h1>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="exportData()">
+                        <i class="fas fa-download me-2"></i>Export Data
+                    </button>
+                    <button class="btn btn-primary" onclick="refreshAnalytics()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="100">
+            <div class="dashboard-card analytics-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Total Patients</h6>
+                        <h3 class="mb-0">{{ analytics.total_patients or 0 }}</h3>
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up"></i> +12% this month
+                        </small>
+                    </div>
+                    <div class="analytics-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="200">
+            <div class="dashboard-card analytics-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Appointments Today</h6>
+                        <h3 class="mb-0">{{ analytics.today_appointments or 0 }}</h3>
+                        <small class="text-info">
+                            <i class="fas fa-clock"></i> 85% completion rate
+                        </small>
+                    </div>
+                    <div class="analytics-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="300">
+            <div class="dashboard-card analytics-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Revenue This Month</h6>
+                        <h3 class="mb-0">${{ analytics.monthly_revenue or 0 }}</h3>
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up"></i> +8% vs last month
+                        </small>
+                    </div>
+                    <div class="analytics-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4" data-animation="animate-slide-up" data-delay="400">
+            <div class="dashboard-card analytics-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Patient Satisfaction</h6>
+                        <h3 class="mb-0">{{ analytics.satisfaction_rate or 0 }}%</h3>
+                        <small class="text-warning">
+                            <i class="fas fa-star"></i> 4.2/5 average rating
+                        </small>
+                    </div>
+                    <div class="analytics-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4" data-animation="animate-slide-in-left" data-delay="100">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Patient Growth & Appointments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="growthChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4" data-animation="animate-slide-in-right" data-delay="200">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Appointment Types
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="appointmentTypesChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Analytics -->
+    <div class="row">
+        <div class="col-lg-6 mb-4" data-animation="animate-slide-up" data-delay="300">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Peak Hours Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="peakHoursChart" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4" data-animation="animate-slide-up" data-delay="400">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-md me-2"></i>Doctor Performance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="doctor-performance">
+                        <div class="doctor-item">
+                            <div class="doctor-info">
+                                <strong>Dr. Smith</strong>
+                                <small class="text-muted">Cardiology</small>
+                            </div>
+                            <div class="doctor-stats">
+                                <span class="badge bg-success">95%</span>
+                                <small>Patient Satisfaction</small>
+                            </div>
+                        </div>
+                        <div class="doctor-item">
+                            <div class="doctor-info">
+                                <strong>Dr. Johnson</strong>
+                                <small class="text-muted">Pediatrics</small>
+                            </div>
+                            <div class="doctor-stats">
+                                <span class="badge bg-info">92%</span>
+                                <small>Patient Satisfaction</small>
+                            </div>
+                        </div>
+                        <div class="doctor-item">
+                            <div class="doctor-info">
+                                <strong>Dr. Williams</strong>
+                                <small class="text-muted">Orthopedics</small>
+                            </div>
+                            <div class="doctor-stats">
+                                <span class="badge bg-warning">88%</span>
+                                <small>Patient Satisfaction</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables -->
+    <div class="row">
+        <div class="col-12" data-animation="animate-slide-up" data-delay="500">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Activity</th>
+                                    <th>User</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>New patient registered</td>
+                                    <td>Dr. Smith</td>
+                                    <td>2 minutes ago</td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Appointment scheduled</td>
+                                    <td>Receptionist</td>
+                                    <td>5 minutes ago</td>
+                                    <td><span class="badge bg-info">Scheduled</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Lab results uploaded</td>
+                                    <td>Lab Staff</td>
+                                    <td>10 minutes ago</td>
+                                    <td><span class="badge bg-warning">Pending Review</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Patient check-in</td>
+                                    <td>QR System</td>
+                                    <td>15 minutes ago</td>
+                                    <td><span class="badge bg-success">Checked In</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Analytics Charts
+document.addEventListener('DOMContentLoaded', function() {
+    // Growth Chart
+    const growthCtx = document.getElementById('growthChart').getContext('2d');
+    new Chart(growthCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'New Patients',
+                data: [65, 78, 90, 85, 95, 110],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Appointments',
+                data: [120, 135, 150, 140, 160, 175],
+                borderColor: '#f093fb',
+                backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Appointment Types Chart
+    const typesCtx = document.getElementById('appointmentTypesChart').getContext('2d');
+    new Chart(typesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Consultation', 'Follow-up', 'Emergency', 'Lab Test'],
+            datasets: [{
+                data: [40, 25, 15, 20],
+                backgroundColor: [
+                    '#667eea',
+                    '#f093fb',
+                    '#4facfe',
+                    '#43e97b'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Peak Hours Chart
+    const peakCtx = document.getElementById('peakHoursChart').getContext('2d');
+    new Chart(peakCtx, {
+        type: 'bar',
+        data: {
+            labels: ['8AM', '10AM', '12PM', '2PM', '4PM', '6PM'],
+            datasets: [{
+                label: 'Appointments',
+                data: [12, 25, 15, 20, 18, 8],
+                backgroundColor: '#667eea'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+
+// Export data function
+function exportData() {
+    showInfo('Export Started', 'Your analytics data is being prepared for download...');
+    // Simulate export process
+    setTimeout(() => {
+        showSuccess('Export Complete', 'Analytics data has been exported successfully!');
+    }, 2000);
+}
+
+// Refresh analytics function
+function refreshAnalytics() {
+    showInfo('Refreshing', 'Updating analytics data...');
+    // Simulate refresh process
+    setTimeout(() => {
+        showSuccess('Updated', 'Analytics data has been refreshed!');
+    }, 1500);
+}
+</script>
+
+<style>
+.analytics-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.analytics-icon {
+    font-size: 2rem;
+    opacity: 0.8;
+}
+
+.doctor-performance {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.doctor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--card-grey);
+    border-radius: 8px;
+}
+
+.doctor-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.doctor-stats {
+    text-align: right;
+}
+
+.doctor-stats small {
+    display: block;
+    color: var(--light-grey);
+    font-size: 0.8rem;
+}
+</style>
+{% endblock %} 

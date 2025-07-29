@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Custom Receipt - Pulse HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid" data-animation="animate-fade-in">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-receipt me-2"></i>Custom Receipt Generator
+                </h1>
+                <button id="scrollToTop" class="scroll-to-top">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Receipt Form -->
+        <div class="col-lg-6 mb-4" data-animation="animate-slide-in-left" data-delay="100">
+            <div class="receipt-form">
+                <h4 class="mb-4">
+                    <i class="fas fa-edit me-2"></i>Receipt Details
+                </h4>
+                
+                <form id="receiptForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="patientName" class="form-label">
+                                    <i class="fas fa-user me-2"></i>Patient Name
+                                </label>
+                                <input type="text" class="form-control" id="patientName" 
+                                       placeholder="Enter patient name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="doctorName" class="form-label">
+                                    <i class="fas fa-user-md me-2"></i>Doctor Name
+                                </label>
+                                <input type="text" class="form-control" id="doctorName" 
+                                       placeholder="Enter doctor name" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="serviceType" class="form-label">
+                                    <i class="fas fa-stethoscope me-2"></i>Service Type
+                                </label>
+                                <select class="form-control" id="serviceType" required>
+                                    <option value="">Select service type</option>
+                                    <option value="Consultation">Consultation</option>
+                                    <option value="Follow-up">Follow-up</option>
+                                    <option value="Emergency">Emergency</option>
+                                    <option value="Laboratory Test">Laboratory Test</option>
+                                    <option value="X-Ray">X-Ray</option>
+                                    <option value="Surgery">Surgery</option>
+                                    <option value="Vaccination">Vaccination</option>
+                                    <option value="Physical Therapy">Physical Therapy</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="amount" class="form-label">
+                                    <i class="fas fa-dollar-sign me-2"></i>Amount
+                                </label>
+                                <input type="number" class="form-control" id="amount" 
+                                       placeholder="0.00" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes" class="form-label">
+                            <i class="fas fa-notes-medical me-2"></i>Notes
+                        </label>
+                        <textarea class="form-control" id="notes" rows="3" 
+                                  placeholder="Enter any additional notes..."></textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="button" id="generateReceipt" class="btn btn-primary">
+                            <i class="fas fa-magic me-2"></i>Generate Receipt
+                        </button>
+                        <button type="button" id="clearForm" class="btn btn-outline-secondary">
+                            <i class="fas fa-eraser me-2"></i>Clear Form
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Receipt Preview -->
+        <div class="col-lg-6 mb-4" data-animation="animate-slide-in-right" data-delay="200">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-eye me-2"></i>Receipt Preview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="receiptPreview" class="text-center text-muted">
+                        <i class="fas fa-receipt fa-4x mb-3"></i>
+                        <p>Fill out the form and click "Generate Receipt" to see a preview</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Receipts -->
+    <div class="row" data-animation="animate-slide-up" data-delay="300">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Recent Receipts
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Receipt #</th>
+                                    <th>Patient</th>
+                                    <th>Service</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentReceipts">
+                                <tr>
+                                    <td>RCP-1732874563-123</td>
+                                    <td>John Doe</td>
+                                    <td>Consultation</td>
+                                    <td>$150.00</td>
+                                    <td>2024-01-15</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>RCP-1732874562-456</td>
+                                    <td>Jane Smith</td>
+                                    <td>Laboratory Test</td>
+                                    <td>$75.00</td>
+                                    <td>2024-01-14</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-receipt me-2"></i>Generated Receipt
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="receiptContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Close
+                </button>
+                <button type="button" id="printReceipt" class="btn btn-primary">
+                    <i class="fas fa-print me-2"></i>Print Receipt
+                </button>
+                <button type="button" id="downloadReceipt" class="btn btn-success">
+                    <i class="fas fa-download me-2"></i>Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Additional receipt functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Clear form button
+    const clearFormBtn = document.getElementById('clearForm');
+    if (clearFormBtn) {
+        clearFormBtn.addEventListener('click', function() {
+            document.getElementById('receiptForm').reset();
+            document.getElementById('receiptPreview').innerHTML = `
+                <i class="fas fa-receipt fa-4x mb-3"></i>
+                <p>Fill out the form and click "Generate Receipt" to see a preview</p>
+            `;
+        });
+    }
+    
+    // Real-time preview
+    const formInputs = document.querySelectorAll('#receiptForm input, #receiptForm select, #receiptForm textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('input', updatePreview);
+    });
+    
+    function updatePreview() {
+        const patientName = document.getElementById('patientName').value || 'Patient Name';
+        const doctorName = document.getElementById('doctorName').value || 'Doctor Name';
+        const serviceType = document.getElementById('serviceType').value || 'Service Type';
+        const amount = document.getElementById('amount').value || '0.00';
+        
+        if (patientName !== 'Patient Name' || doctorName !== 'Doctor Name' || serviceType !== 'Service Type') {
+            document.getElementById('receiptPreview').innerHTML = `
+                <div class="receipt-container" style="transform: scale(0.8);">
+                    <div class="receipt-header">
+                        <div class="receipt-logo">
+                            <i class="fas fa-heartbeat"></i>
+                            <h3>Pulse HMS</h3>
+                        </div>
+                    </div>
+                    <div class="receipt-body">
+                        <div class="receipt-section">
+                            <h4>Patient Information</h4>
+                            <p><strong>Name:</strong> ${patientName}</p>
+                            <p><strong>Doctor:</strong> ${doctorName}</p>
+                        </div>
+                        <div class="receipt-section">
+                            <h4>Service Details</h4>
+                            <p><strong>Service:</strong> ${serviceType}</p>
+                            <p><strong>Amount:</strong> $${amount}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+});
+</script>
+{% endblock %} 
