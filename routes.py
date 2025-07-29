@@ -102,14 +102,21 @@ def create_appointment():
         import uuid
         appointment_id = f"APT{uuid.uuid4().hex[:8].upper()}"
         
+        # Combine date and time for appointment datetime
+        date_str = request.form['appointment_date']
+        time_str = request.form['appointment_time']
+        appointment_datetime = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
+        
         appointment = Appointment(
             appointment_id=appointment_id,
             patient_id=request.form['patient_id'],
             doctor_id=request.form.get('doctor_id'),
-            appointment_date=datetime.strptime(request.form['appointment_date'], '%Y-%m-%dT%H:%M'),
+            appointment_date=appointment_datetime,
             duration=int(request.form.get('duration', 30)),
-            type=request.form['type'],
-            reason=request.form['reason'],
+            appointment_type=request.form['appointment_type'],
+            priority=request.form.get('priority', 'normal'),
+            reason=request.form.get('reason'),
+            notes=request.form.get('notes'),
             created_by_id=current_user.id
         )
         
@@ -169,7 +176,7 @@ def patients():
                 Patient.first_name.ilike(f'%{search}%'),
                 Patient.last_name.ilike(f'%{search}%'),
                 Patient.patient_id.ilike(f'%{search}%'),
-                Patient.phone.ilike(f'%{search}%')
+                Patient.phone_number.ilike(f'%{search}%')
             )
         )
     
@@ -192,15 +199,16 @@ def create_patient():
             patient_id=patient_id,
             first_name=request.form['first_name'],
             last_name=request.form['last_name'],
-            date_of_birth=datetime.strptime(request.form['date_of_birth'], '%Y-%m-%d').date(),
-            gender=request.form['gender'],
-            phone=request.form['phone'],
+            date_of_birth=datetime.strptime(request.form['date_of_birth'], '%Y-%m-%d').date() if request.form['date_of_birth'] else None,
+            gender=request.form.get('gender'),
+            phone_number=request.form['phone_number'],
             email=request.form.get('email'),
             address=request.form.get('address'),
             emergency_contact=request.form.get('emergency_contact'),
-            emergency_phone=request.form.get('emergency_phone'),
             blood_type=request.form.get('blood_type'),
-            allergies=request.form.get('allergies')
+            allergies=request.form.get('allergies'),
+            medical_history=request.form.get('medical_history'),
+            created_by_id=current_user.id
         )
         
         # Generate access code for patient dashboard

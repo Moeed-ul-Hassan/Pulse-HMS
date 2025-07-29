@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Create Appointment - Pulse HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1 fade-in-up">
+                        <i class="fas fa-calendar-plus me-2 text-primary"></i>Create New Appointment
+                    </h1>
+                    <p class="text-muted mb-0">Schedule a new patient appointment</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('main.appointments') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Appointments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Appointment Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-card p-4">
+                <form method="POST" class="needs-validation" novalidate>
+                    <div class="row">
+                        <!-- Patient Selection -->
+                        <div class="col-md-6 mb-3">
+                            <label for="patient_id" class="form-label">
+                                <i class="fas fa-user me-2"></i>Patient *
+                            </label>
+                            <select class="form-select" id="patient_id" name="patient_id" required>
+                                <option value="">Select a patient...</option>
+                                {% for patient in patients %}
+                                <option value="{{ patient.id }}">
+                                    {{ patient.full_name }} - {{ patient.phone_number }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a patient.
+                            </div>
+                        </div>
+
+                        <!-- Doctor Selection -->
+                        <div class="col-md-6 mb-3">
+                            <label for="doctor_id" class="form-label">
+                                <i class="fas fa-user-md me-2"></i>Doctor *
+                            </label>
+                            <select class="form-select" id="doctor_id" name="doctor_id" required>
+                                <option value="">Select a doctor...</option>
+                                {% for doctor in doctors %}
+                                <option value="{{ doctor.id }}">
+                                    Dr. {{ doctor.full_name }} - {{ doctor.username }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a doctor.
+                            </div>
+                        </div>
+
+                        <!-- Appointment Date -->
+                        <div class="col-md-6 mb-3">
+                            <label for="appointment_date" class="form-label">
+                                <i class="fas fa-calendar me-2"></i>Date *
+                            </label>
+                            <input type="date" class="form-control" id="appointment_date" name="appointment_date" required>
+                            <div class="invalid-feedback">
+                                Please select an appointment date.
+                            </div>
+                        </div>
+
+                        <!-- Appointment Time -->
+                        <div class="col-md-6 mb-3">
+                            <label for="appointment_time" class="form-label">
+                                <i class="fas fa-clock me-2"></i>Time *
+                            </label>
+                            <input type="time" class="form-control" id="appointment_time" name="appointment_time" required>
+                            <div class="invalid-feedback">
+                                Please select an appointment time.
+                            </div>
+                        </div>
+
+                        <!-- Appointment Type -->
+                        <div class="col-md-6 mb-3">
+                            <label for="appointment_type" class="form-label">
+                                <i class="fas fa-stethoscope me-2"></i>Type *
+                            </label>
+                            <select class="form-select" id="appointment_type" name="appointment_type" required>
+                                <option value="">Select appointment type...</option>
+                                <option value="consultation">Consultation</option>
+                                <option value="follow_up">Follow-up</option>
+                                <option value="emergency">Emergency</option>
+                                <option value="routine_checkup">Routine Checkup</option>
+                                <option value="specialist">Specialist Visit</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select an appointment type.
+                            </div>
+                        </div>
+
+                        <!-- Priority -->
+                        <div class="col-md-6 mb-3">
+                            <label for="priority" class="form-label">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Priority
+                            </label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="normal">Normal</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="emergency">Emergency</option>
+                            </select>
+                        </div>
+
+                        <!-- Reason for Visit -->
+                        <div class="col-12 mb-3">
+                            <label for="reason" class="form-label">
+                                <i class="fas fa-notes-medical me-2"></i>Reason for Visit
+                            </label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" 
+                                      placeholder="Brief description of the reason for this appointment..."></textarea>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12 mb-4">
+                            <label for="notes" class="form-label">
+                                <i class="fas fa-sticky-note me-2"></i>Notes
+                            </label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2" 
+                                      placeholder="Additional notes or special instructions..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-end gap-3">
+                        <a href="{{ url_for('main.appointments') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Create Appointment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Set minimum date to today
+document.getElementById('appointment_date').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}
