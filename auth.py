@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash
 from models import User, Patient
 from app import db, login_manager
 from utils import log_audit
+from datetime import datetime
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -25,7 +26,7 @@ def login():
         
         if user and user.check_password(password) and user.is_active:
             login_user(user, remember=remember_me)
-            user.last_login = db.datetime.utcnow()
+            user.last_login = datetime.utcnow()
             db.session.commit()
             
             log_audit(user.id, 'login', 'user', user.id, {'username': username})

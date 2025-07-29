@@ -17,10 +17,11 @@ from pydantic import BaseModel
 # This API key is from Gemini Developer API Key, not vertex AI API Key
 # Make AI services optional for development/demo
 try:
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY", "AIzaSyC9JNLUKV8-1uKk0cphIqf3Yxtr-lo-uv0")
     if api_key:
         client = genai.Client(api_key=api_key)
         AI_AVAILABLE = True
+        print("✅ Gemini AI services enabled successfully!")
     else:
         client = None
         AI_AVAILABLE = False
